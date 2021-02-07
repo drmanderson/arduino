@@ -136,3 +136,15 @@ railway-servo-LED/build/preproc/ctags_target_for_gcc_minus_e.cpp
 railway-servo-LED/build/sketch/railway-servo-LED.ino.cpp
 railway-servo-LED/build/sketch/railway-servo-LED.ino.cpp.d
 railway-servo-LED/build/sketch/railway-servo-LED.ino.cpp.o
+generated_examples/Blink/Blink.ino
+generated_examples/Blink/Blink.txt
+generated_examples/Blink/.vscode/arduino.json
+generated_examples/Blink/.vscode/c_cpp_properties.json
+generated_examples/Blink_1/Blink.ino
+generated_examples/Blink_1/Blink.txt
+generated_examples/Blink_1/.vscode/arduino.json
+generated_examples/Blink_1/.vscode/c_cpp_properties.json
+generated_examples/Blink_2/Blink.ino
+generated_examples/Blink_2/Blink.txt
+generated_examples/Blink_2/.vscode/arduino.json
+generated_examples/Blink_2/.vscode/c_cpp_properties.json
