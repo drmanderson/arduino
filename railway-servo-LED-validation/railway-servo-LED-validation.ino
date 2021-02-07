@@ -86,22 +86,22 @@ void setup()
 
   // Setup NUMSERVOS servos
   // Remember to update ths number when new servos are added.
-  servo[0].pwmcard = pwm;
+  servo[0].pwmcard = pwm2;
   servo[0].pwmcard_socket = 0;
   servo[0].openangle = 115;
   servo[0].closeangle = 45;
 
-  servo[1].pwmcard = pwm;
+  servo[1].pwmcard = pwm2;
   servo[1].pwmcard_socket = 4;
   servo[1].openangle = 145;
   servo[1].closeangle = 70;
 
-  servo[2].pwmcard = pwm1;
+  servo[2].pwmcard = pwm2;
   servo[2].pwmcard_socket = 1;
   servo[2].openangle = 60;
   servo[2].closeangle = 135; 
 
-  servo[3].pwmcard = pwm1;
+  servo[3].pwmcard = pwm2;
   servo[3].pwmcard_socket = 5;
   servo[3].openangle = 60;
   servo[3].closeangle = 134;
@@ -158,70 +158,43 @@ void move_points ( ) {
     switch (incoming1) {
   
       case B00000001:
-        // Button "1:" - close juction one
-        // This is a cross over so throws two servos
-        Serial.print("Buton 1.   74HC615-1 BIN value : ");
+        Serial.print("One : ");
         Serial.println(incoming1, BIN);
-        move_servo (servo[0].pwmcard, servo[0].pwmcard_socket, servo[0].closeangle);
-        move_servo (servo[1].pwmcard, servo[1].pwmcard_socket, servo[1].closeangle);
-        LEDpattern1 = bitClear(LEDpattern1,0);
-        set_LEDS(); 
-        delay(500);
         break;
 
       case B00000010:
-        // Button "2" - open juntion one
-        // This is a cross over so throws two servos
-        Serial.print("Buton 2.   74HC615-1 BIN value : ");
+        Serial.print("Two : ");
         Serial.println(incoming1, BIN);          
-        move_servo (servo[0].pwmcard, servo[0].pwmcard_socket, servo[0].openangle);
-        move_servo (servo[1].pwmcard, servo[1].pwmcard_socket, servo[1].openangle); 
-        LEDpattern1 = LEDpattern1 | LEDArray[0];
-        set_LEDS();       
-        delay(500);    
         break;
 
       case B00000100:
-        // Button "3" - close Juction two;
-        // This is a cross over so throws two servos
-        Serial.print("Buton 3.   74HC615-1 BIN value : ");
-        Serial.println(incoming1, BIN);   
-        move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].closeangle);
-        move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].closeangle);  
-        LEDpattern1 = bitClear(LEDpattern1,1);
-        set_LEDS();   
+        Serial.print("Three : ");
+        Serial.println(incoming1, BIN);     
         delay(500);      
         break;
 
       case B00001000:
-        // Button "4" - open Juction two;
-        // This is a cross over so throws two servos
-        Serial.print("Buton 4.   74HC615-1 BIN value : ");
+        Serial.print("Four : ");
         Serial.println(incoming1, BIN);       
-        move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].openangle);
-        move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].openangle);
-        LEDpattern1 = LEDpattern1 | LEDArray[1];
-        set_LEDS();                 
-        delay(500);   
         break;
 
       case B00010000:
-        Serial.print("Buton 5.   74HC615-1 BIN value : ");
+        Serial.print("Five : ");
         Serial.println(incoming1, BIN);   
         break;
   
       case B00100000:
-        Serial.print("Buton 6.   74HC615-1 BIN value : ");
+        Serial.print("Six : ");
         Serial.println(incoming1, BIN);   
         break;
 
       case B01000000:
-        Serial.print("Buton 7.   74HC615-1 BIN value : ");
+        Serial.print("Seven : ");
         Serial.println(incoming1, BIN);   
         break;
       
       case B10000000:
-        Serial.print("Buton 8.   74HC615-1 BIN value : ");
+        Serial.print("Eight : ");
         Serial.println(incoming1, BIN);   
         break;
         
@@ -234,59 +207,43 @@ void move_points ( ) {
     switch (incoming2) {
       
       case B00000001:
-        Serial.print("Buton 9.   74HC615-2 BIN value : ");
+        Serial.print("Nine : ");
         Serial.println(incoming2, BIN);   
         break;
 
       case B00000010:
-        Serial.print("Buton 10.  74HC615-2 BIN value : ");
+        Serial.print("Ten : ");
         Serial.println(incoming2, BIN);   
         break;
 
       case B00000100:
-        Serial.print("Buton 11.  74HC615-2 BIN value : ");
+        Serial.print("Eleven : ");
         Serial.println(incoming2, BIN);   
         break;
 
       case B00001000:
-        Serial.print("Buton 13.  74HC615-2 BIN value : ");
+        Serial.print("Twelve : ");
         Serial.println(incoming2, BIN);   
         break;
 
       case B00010000:
-        // Button "13:" - close juction three
-        // This is a simple point - one servo
-        Serial.print("Buton 13.  74HC615-2 BIN value : ");
+        Serial.print("Thirteen : ");
         Serial.println(incoming2, BIN);
-        move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].closeangle);
-        LEDpattern2 = bitClear(LEDpattern2,6);
-        set_LEDS();          
-        delay(500);
         break;
   
       case B00100000:
-        // Button "14:" - close juction three
-        // This is a simple point - one servo
-        Serial.print("Buton 14.  74HC615-2 BIN value : ");
+        Serial.print("Fourteen : ");
         Serial.println(incoming2, BIN);
-        move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].openangle);
-        LEDpattern2 = LEDpattern2 | LEDArray[6];
-        set_LEDS();         
-        delay(500); 
         break;
 
       case B01000000:
-        Serial.print("Buton 15.  74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN); 
-        LEDpattern2 = bitClear(LEDpattern2,7);
-        set_LEDS();    
+        Serial.print("Fifteen : ");
+        Serial.println(incoming2, BIN);  
         break;
       
       case B10000000:
-        Serial.print("Buton 16.  74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN);
-        LEDpattern2 = LEDpattern2 | LEDArray[7];
-        set_LEDS();    
+        Serial.print("Sixteen : ");
+        Serial.println(incoming2, BIN);  
         break;
         
       default:
