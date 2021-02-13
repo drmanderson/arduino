@@ -148,3 +148,5 @@ generated_examples/Blink_2/Blink.ino
 generated_examples/Blink_2/Blink.txt
 generated_examples/Blink_2/.vscode/arduino.json
 generated_examples/Blink_2/.vscode/c_cpp_properties.json
+code/Adafruit-PWM-Servo-Driver-Library
+code/DCC_Decoder
