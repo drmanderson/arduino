@@ -139,7 +139,9 @@ void read_values() {
   digitalWrite(clockPin, HIGH);
   digitalWrite(clockEnablePin, LOW);
   incoming1 = shiftIn(dataPin, clockPin, MSBFIRST);
+  Serial.println(incoming1);
   incoming2 = shiftIn(dataPin, clockPin, MSBFIRST);
+  Serial.println(incoming2);
   digitalWrite(clockEnablePin, HIGH);
 }
 
@@ -199,7 +201,7 @@ void move_points ( ) {
         break;
         
       default:
-        Serial.print ("Default: ");
+        Serial.print ( "74HC165-1 Default: ");
         Serial.println(incoming1, BIN);
         break;    
     }
@@ -247,7 +249,7 @@ void move_points ( ) {
         break;
         
       default:
-        Serial.print ("Default: ");
+        Serial.print (" 74HC165-2 Default: ");
         Serial.println(incoming2, BIN);
         break;    
     }
