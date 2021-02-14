@@ -277,7 +277,7 @@ void move_points ( ) {
         break;
 
       default:
-        Serial.print ("Default: ");
+        Serial.print ("74HC165-1 Default: ");
         Serial.println(incoming1, BIN);
         break;
     }
@@ -357,7 +357,7 @@ void move_points ( ) {
         break;
 
       default:
-        Serial.print ("Default: ");
+        Serial.print ("74HC165-2 Default: ");
         Serial.println(incoming2, BIN);
         break;
     }
