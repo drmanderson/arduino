@@ -1,10 +1,10 @@
 // HARDWARE CONNECTIONS
 // Connect the following pins between your Arduino and the 74HC165 Breakout Board
 // Connect pins A-H to 5V or GND or switches or whatever
-const int data_pin = 11; // Connect Pin 11 to SER_OUT (serial data out)
-const int shld_pin = 8; // Connect Pin 8 to SH/!LD (shift or active low load)
-const int clk_pin = 12; // Connect Pin 12 to CLK (the clock that times the shifting)
-const int ce_pin = 9; // Connect Pin 9 to !CE (clock enable, active low)
+const int data_pin = 5;  // Connect Pin 5 to SER_OUT (9) (serial data out)
+const int shld_pin = 7;   // Connect Pin 7 to SH/!LD (1) (shift or active low load)
+const int clk_pin = 6;   // Connect Pin 6 to CLK (2) (the clock that times the shifting)
+const int ce_pin = 4;     // Connect Pin 4 to !CE (15) (clock enable, active low)
 
 byte incoming; // Variable to store the 8 values loaded from the shift register
 
@@ -36,8 +36,8 @@ void loop() {
   // Print out the values being read from the shift register
   Serial.println("\nThe incoming values of the shift register are: ");
   Serial.print("ABCDEFGH : ");
-  print_byte(incoming); // Print every 1 and 0 that correlates with A through H
-  //Serial.println(incoming,BIN); // This way works too but leaves out the leading zeros
+  //print_byte(incoming); // Print every 1 and 0 that correlates with A through H
+  Serial.println(incoming,BIN); // This way works too but leaves out the leading zeros
 
   delay(200); // Wait for some arbitrary amount of time
 
@@ -68,13 +68,14 @@ byte read_shift_regs()
 
 }
 
-// A function that prints all the 1's and 0's of a byte, so 8 bits +or- 2
-void print_byte(byte val)
-{
-    byte i;
-    for(byte i=0; i<=7; i++)
-    {
-      Serial.print(val >> i & 1, BIN); // Magic bit shift, if you care look up the <<, >>, and & operators
-    }
-    Serial.print("\n"); // Go to the next line, do not collect $200
-}
+//// A function that prints all the 1's and 0's of a byte, so 8 bits +or- 2
+//void print_byte(byte val)
+//{
+//    byte i;
+//    for(byte i=0; i<=7; i++)
+//    {
+//      Serial.print(val >> i & 1, BIN); // Magic bit shift, if you care look up the <<, >>, and & operators
+//      //Serial.print(i, BIN); // Magic bit shift, if you care look up the <<, >>, and & operators
+//    }
+//    Serial.print("\n"); // Go to the next line, do not collect $200
+//}

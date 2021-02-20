@@ -86,39 +86,39 @@ void setup()
 
   // Setup NUMSERVOS servos
   // Remember to update ths number when new servos are added.
-  servo[0].pwmcard = pwm2;
-  servo[0].pwmcard_socket = 0;
-  servo[0].openangle = 115;
-  servo[0].closeangle = 45;
-
-  servo[1].pwmcard = pwm2;
-  servo[1].pwmcard_socket = 4;
-  servo[1].openangle = 145;
-  servo[1].closeangle = 70;
-
-  servo[2].pwmcard = pwm2;
-  servo[2].pwmcard_socket = 1;
-  servo[2].openangle = 60;
-  servo[2].closeangle = 135; 
-
-  servo[3].pwmcard = pwm2;
-  servo[3].pwmcard_socket = 5;
-  servo[3].openangle = 60;
-  servo[3].closeangle = 134;
- 
-  servo[4].pwmcard = pwm;
-  servo[4].pwmcard_socket = 8;
-  servo[4].openangle = 135;
-  servo[4].closeangle = 60;
-  
-  // Start board in safe positions with all junctions "closed"
-  for (int i = 0; i <= NUMSERVOS-1; i++) {
-    Serial.print("Closing :");
-    Serial.println(i);
-    move_servo (servo[i].pwmcard, servo[i].pwmcard_socket, servo[i].closeangle);
-    delay(500);
-  } 
-  // Flash all the LEDS
+//  servo[0].pwmcard = pwm2;
+//  servo[0].pwmcard_socket = 0;
+//  servo[0].openangle = 115;
+//  servo[0].closeangle = 45;
+//
+//  servo[1].pwmcard = pwm2;
+//  servo[1].pwmcard_socket = 4;
+//  servo[1].openangle = 145;
+//  servo[1].closeangle = 70;
+//
+//  servo[2].pwmcard = pwm2;
+//  servo[2].pwmcard_socket = 1;
+//  servo[2].openangle = 60;
+//  servo[2].closeangle = 135; 
+//
+//  servo[3].pwmcard = pwm2;
+//  servo[3].pwmcard_socket = 5;
+//  servo[3].openangle = 60;
+//  servo[3].closeangle = 134;
+// 
+//  servo[4].pwmcard = pwm;
+//  servo[4].pwmcard_socket = 8;
+//  servo[4].openangle = 135;
+//  servo[4].closeangle = 60;
+//  
+//  // Start board in safe positions with all junctions "closed"
+//  for (int i = 0; i <= NUMSERVOS-1; i++) {
+//    Serial.print("Closing :");
+//    Serial.println(i);k
+//    move_servo (servo[i].pwmcard, servo[i].pwmcard_socket, servo[i].closeangle);
+//    delay(500);
+//  } 
+//  // Flash all the LEDS
   LEDpattern1 = B11111111;
   LEDpattern2 = B11111111;  
   set_LEDS ();
@@ -139,10 +139,13 @@ void read_values() {
   digitalWrite(clockPin, HIGH);
   digitalWrite(clockEnablePin, LOW);
   incoming1 = shiftIn(dataPin, clockPin, MSBFIRST);
-  Serial.println(incoming1);
-  incoming2 = shiftIn(dataPin, clockPin, MSBFIRST);
-  Serial.println(incoming2);
-  digitalWrite(clockEnablePin, HIGH);
+  Serial.print("SR 1: ");
+  Serial.println(incoming1, BIN);
+   incoming2 = 0;
+  // incoming2 = shiftIn(dataPin, clockPin, MSBFIRST);
+  // digitalWrite(clockEnablePin, HIGH);
+  // Serial.print("SR 2: ");
+  // Serial.println(incoming2, BIN);
 }
 
 void set_LEDS () {
@@ -157,6 +160,7 @@ void move_points ( ) {
   // Print to serial monitor
   // Move either one or two servos based on which button has been pressed
   if (incoming1 > 0 ) {
+    Serial.println(incoming1);
     switch (incoming1) {
   
       case B00000001:
