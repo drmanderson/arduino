@@ -346,7 +346,7 @@ void move_points ( ) {
         set_LEDS();
         break;
 
-      case B01110001:
+      case B10000000:
         Serial.print("Buton 16.  74HC615-2 BIN value : ");
         Serial.println(incoming2, BIN);
         move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].closeangle);
