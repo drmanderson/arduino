@@ -139,13 +139,13 @@ void read_values() {
   digitalWrite(clockPin, HIGH);
   digitalWrite(clockEnablePin, LOW);
   incoming1 = shiftIn(dataPin, clockPin, MSBFIRST);
-  Serial.print("SR 1: ");
-  Serial.println(incoming1, BIN);
+//  Serial.print("SR 1: ");
+//  Serial.println(incoming1, BIN);
    incoming2 = 0;
-  // incoming2 = shiftIn(dataPin, clockPin, MSBFIRST);
-  // digitalWrite(clockEnablePin, HIGH);
-  // Serial.print("SR 2: ");
-  // Serial.println(incoming2, BIN);
+//   incoming2 = shiftIn(dataPin, clockPin, MSBFIRST);
+//   digitalWrite(clockEnablePin, HIGH);
+//   Serial.print("SR 2: ");
+//   Serial.println(incoming2, BIN);
 }
 
 void set_LEDS () {
@@ -160,7 +160,7 @@ void move_points ( ) {
   // Print to serial monitor
   // Move either one or two servos based on which button has been pressed
   if (incoming1 > 0 ) {
-    Serial.println(incoming1);
+//
     switch (incoming1) {
   
       case B00000001:
