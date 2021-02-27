@@ -20,14 +20,6 @@ struct ServoData {
 };
 ServoData servo[NUMSERVOS];
 
-/* 74hc165 Width of pulse to trigger the shift register to read and latch.
-*/
-#define PULSE_WIDTH_USEC   5
-
-/* 74hc165 Optional delay between shift register reads.
-*/
-#define POLL_DELAY_MSEC   20
-
 // For each 74HC595 there needs to be a LEDpatternx up to 4
 // For more 75HC165 chips added new variables as required up to incoming4.
 // For multiple chips the loops in read_values, set_LEDS and the if case structure in move_points
@@ -60,6 +52,10 @@ void setup()
   pinMode(clockEnablePin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, INPUT);
+ // Required initial states of these two pins according to the datasheet timing diagram
+  digitalWrite(clockPin, HIGH);
+  digitalWrite(ploadPin,HIGH);
+
   // Setup 74HC696 serial connections
   pinMode(latchPinOut, OUTPUT);
   pinMode(clockPinOut, OUTPUT);
@@ -168,11 +164,13 @@ void setup()
 void read_values() {
   // Write pulse to load pin
   digitalWrite(ploadPin, LOW);
-  delayMicroseconds(PULSE_WIDTH_USEC);
+  delayMicroseconds(5);
   digitalWrite(ploadPin, HIGH);
-  delayMicroseconds(PULSE_WIDTH_USEC);
+  delayMicroseconds(5);
 
   // Get data from 74HC165 chips
+  pinMode(clockPin, OUTPUT);
+  pinMode(dataPin, INPUT);  
   digitalWrite(clockPin, HIGH);
   digitalWrite(clockEnablePin, LOW);
   incoming1 = shiftIn(dataPin, clockPin, MSBFIRST);
