@@ -7,6 +7,7 @@ const int clockPin        = 6;  // Connects to the Clock pin the 165 (2)
 const int ploadPin        = 7;  // Connects to Parallel load pin the 165 (1)
 
 byte incoming1;                 // new values for first 74HC165 chip
+byte incoming2;                 // new values for second 74HC165 chip
 
 
 void setup()
@@ -28,9 +29,9 @@ void setup()
 
 }
 
-byte read_values() {
+void read_values() {
 
-  byte data = 0;
+  
   // Write pulse to load pin
   digitalWrite(ploadPin, LOW);
   delayMicroseconds(5);
@@ -42,21 +43,19 @@ byte read_values() {
   pinMode(dataPin, INPUT);
   digitalWrite(clockPin, HIGH);
   digitalWrite(clockEnablePin, LOW);
-  data = shiftIn(dataPin, clockPin, MSBFIRST);
-  Serial.print("SR 1: ");
-  Serial.println(data, BIN);
+  incoming1 = shiftIn(dataPin, clockPin, MSBFIRST);
+  incoming2 = shiftIn(dataPin, clockPin, MSBFIRST); 
 
-  digitalWrite(clockPin, HIGH);
-  
-  return data;
-
+  digitalWrite(clockEnablePin, HIGH);
 }
 
 void loop()
 {
-  incoming1 = read_values();
+  read_values();
   Serial.print("Data is: ");
-  Serial.println(incoming1, BIN);
+  Serial.print(incoming1, BIN);
+  Serial.print(" : ");
+  Serial.println(incoming2, BIN);
 
   delay(500);
 }
