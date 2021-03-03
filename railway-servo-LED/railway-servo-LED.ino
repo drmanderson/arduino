@@ -1,3 +1,7 @@
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27,20,4); 
 
 // include the PWMServo library
 #include <Adafruit_PWMServoDriver.h>
@@ -42,10 +46,17 @@ int LEDArray[8] = {B00000001, B00000010, B00000100, B00001000, B00010000, B00100
 
 void setup()
 {
-
+  // Setup i2c LCD
+  lcd.init();
+  lcd.backlight();
+	lcd.clear();
+	lcd.setCursor(0,0);
+	lcd.print("Setting up ....");
+  delay(2000);
+  lcd.clear();
   // Setup Serial Monitor
   Serial.begin(9600);
-  Serial.println("Starting");
+  Serial.println("Setting up ....");
 
   // Setup 74HC165 Serial connections
   pinMode(ploadPin, OUTPUT);
@@ -159,6 +170,9 @@ void setup()
   LEDpattern1 = B00000000;
   LEDpattern2 = B00000000;
   set_LEDS ();
+	
+  lcd.print("Setup done.");
+  Serial.println("Setup done.");
 }
 
 void read_values() {
@@ -194,169 +208,234 @@ void move_points ( ) {
 
       case B00000001:
         // Button "1:" - close juction one
-        // This is a cross over so throws two servos
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 1.   74HC615-1 BIN value : ");
         Serial.println(incoming1, BIN);
         move_servo (servo[0].pwmcard, servo[0].pwmcard_socket, servo[0].closeangle);
         move_servo (servo[1].pwmcard, servo[1].pwmcard_socket, servo[1].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,0);
         set_LEDS();
+        lcd.print("Closing - two ");
         delay(500);
         break;
 
       case B00000010:
         // Button "2" - open juntion one
-        // This is a cross over so throws two servos
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 2.   74HC615-1 BIN value : ");
         Serial.println(incoming1, BIN);
         move_servo (servo[0].pwmcard, servo[0].pwmcard_socket, servo[0].openangle);
         move_servo (servo[1].pwmcard, servo[1].pwmcard_socket, servo[1].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[0];
         set_LEDS();
+        lcd.print("Closing - two ");
         delay(500);
         break;
 
       case B00000100:
-        // Button "3" - close Juction two;
-        // This is a cross over so throws two servos
+        // Button "3" - close Juction two
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 3.   74HC615-1 BIN value : ");
         Serial.println(incoming1, BIN);
         move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].closeangle);
         move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].closeangle);
-        LEDpattern1 = bitClear(LEDpattern1,1);
+        LEDpattern1 = bitClear(LEDpattern1,0);
         set_LEDS();
+        lcd.print("Closing - two ");
         delay(500);
         break;
 
       case B00001000:
-        // Button "4" - open Juction two;
-        // This is a cross over so throws two servos
+        // Button "4" - open Juction two
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 4.   74HC615-1 BIN value : ");
         Serial.println(incoming1, BIN);
         move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].openangle);
         move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[1];
         set_LEDS();
+        lcd.print("Closing - two ");
         delay(500);
         break;
 
       case B00010000:
+        // Button "5" - open Juction three
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 5.   74HC615-1 BIN value : ");
         Serial.println(incoming1, BIN);
-        move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].openangle);
-        LEDpattern1 = LEDpattern1 | LEDArray[1];
+        move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].closeangle);
+        LEDpattern1 = LEDpattern1 | LEDArray[2];
         set_LEDS();
+        lcd.print("Closing - two ");
         delay(500);
         break;
 
       case B00100000:
+        // Button "6" - close Juction three
+        lcd.clear();
+        lcd.home();
         Serial.print("Button 6.   74HC615-1 BIN value : ");
         Serial.println(incoming1, BIN);
-        move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].closeangle);
-        LEDpattern1 = bitClear(LEDpattern1,1);
+        move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].openangle);
         set_LEDS();
+        lcd.print("Closing - two ");
         delay(500);
         break;
 
       case B01000000:
+        // Button "7" - open Juction four      
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 7.   74HC615-1 BIN value : ");
         Serial.println(incoming1, BIN);
         move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].openangle);
-        LEDpattern1 = LEDpattern1 | LEDArray[1];
+        LEDpattern1 = LEDpattern1 | LEDArray[3];
         set_LEDS();
+        lcd.print("Closing - two ");
+        delay(500);
         break;
 
       case B10000000:
+        // Button "8" - open Juction four      
+        lcd.clear();
+        lcd.home();      
         Serial.print("Buton 8.   74HC615-1 BIN value : ");
         Serial.println(incoming1, BIN);
         move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,1);
         set_LEDS();
+        lcd.print("Closing - two ");
+        delay(500);
         break;
 
       default:
-        Serial.print ("74HC165-1 Default: ");
+        // default - it's broken 
+        lcd.clear();
+        lcd.home();
+        Serial.print ("Failure - 74HC165-1 : ");
         Serial.println(incoming1, BIN);
+        lcd.print("Failure...");
         break;
     }
   } else if (incoming2 > 0 ) {
     switch (incoming2) {
 
       case B00000001:
+        // Button "9" - open Juction five     
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 9.   74HC615-2 BIN value : ");
         Serial.println(incoming2, BIN);
          move_servo (servo[7].pwmcard, servo[7].pwmcard_socket, servo[7].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[1];
         set_LEDS();
+        lcd.print("Closing - two ");
+        delay(500);
         break;
 
       case B00000010:
+        // Button "10" - close Juction five
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 10.  74HC615-2 BIN value : ");
         Serial.println(incoming2, BIN);
         move_servo (servo[7].pwmcard, servo[7].pwmcard_socket, servo[7].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,1);
         set_LEDS();
+        lcd.print("Closing - two ");
+        delay(500);
         break;
 
       case B00000100:
+        // Button "11" - open Juction six
+        lcd.clear(); 
+        lcd.home();
         Serial.print("Buton 11.  74HC615-2 BIN value : ");
         Serial.println(incoming2, BIN);
          move_servo (servo[8].pwmcard, servo[8].pwmcard_socket, servo[8].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[1];
         set_LEDS();
+        lcd.print("Closing - two ");
+        delay(500);
         break;
 
       case B00001000:
+        // Button "12" - close Juction six
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 12.  74HC615-2 BIN value : ");
         Serial.println(incoming2, BIN);
         move_servo (servo[8].pwmcard, servo[8].pwmcard_socket, servo[8].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,1);
         set_LEDS();
+        lcd.print("Closing - two ");
+        delay(500);
         break;
 
       case B00010000:
-        // Button "13:" - close juction three
-        // This is a simple point - one servo
+        // Button "13" - open Juction seven
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 13.  74HC615-2 BIN value : ");
         Serial.println(incoming2, BIN);
         move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].closeangle);
         LEDpattern2 = bitClear(LEDpattern2,6);
         set_LEDS();
+        lcd.print("Closing - two ");
         delay(500);
         break;
 
       case B00100000:
-        // Button "14:" - close juction three
-        // This is a simple point - one servo
+        // Button "14" - close Juction seven
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 14.  74HC615-2 BIN value : ");
         Serial.println(incoming2, BIN);
         move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].openangle);
-        LEDpattern2 = LEDpattern2 | LEDArray[6];
+        LEDpattern2 = bitClear(LEDpattern2,6);
         set_LEDS();
+        lcd.print("Closing - two ");
         delay(500);
         break;
 
       case B01000000:
+        // Button "15" - open Juction eight
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 15.  74HC615-2 BIN value : ");
         Serial.println(incoming2, BIN);
         move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].openangle);
         LEDpattern2 = LEDpattern2 | LEDArray[6];
         set_LEDS();
-        LEDpattern2 = bitClear(LEDpattern2,7);
-        set_LEDS();
+        lcd.print("Closing - two ");
+        delay(500);
         break;
 
       case B10000000:
+        // Button "16" - close Juction eight
+        lcd.clear();
+        lcd.home();
         Serial.print("Buton 16.  74HC615-2 BIN value : ");
         Serial.println(incoming2, BIN);
         move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].closeangle);
-        LEDpattern2 = bitClear(LEDpattern2,6);
+        LEDpattern2 = bitClear(LEDpattern2,7);
         set_LEDS();
+        lcd.print("Closing - two ");
+        delay(500);
         break;
 
       default:
+         // default - it's broken 
+        lcd.clear();
+        lcd.home();
         Serial.print ("74HC165-2 Default: ");
         Serial.println(incoming2, BIN);
+        lcd.print("Failure...");
         break;
     }
   }
@@ -379,10 +458,14 @@ void move_servo (Adafruit_PWMServoDriver pwmcard, int srv,int ang)  {
 void loop()
 {
   read_values();
+  // Check to see if values have changed
   if (incoming1 != old_incoming1 || incoming2 != old_incoming2) {
+    // yes values have changed lets move points
     move_points();
+    // Update values
     old_incoming1 = incoming1;
     old_incoming2 = incoming2;
+    // adjust LED to reflect changed point positions
     set_LEDS();
   }
   delay(200);
