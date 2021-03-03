@@ -1,3 +1,10 @@
+
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27,20,4); 
+
+
 // include the PWMServo library
 #include <Adafruit_PWMServoDriver.h>
 
@@ -33,18 +40,28 @@ int clockPinOut     = 10;  // Connects to the SRCLK ping of the 595 (11) SH_CP
 int dataPinOut      = 11;  // Connects to the SER pin of the 595 (14) DS
 byte old_incoming1;    // old values for first 74HC165 chip
 byte incoming1;        // new values for first 74HC165 chip
-byte old_incoming2;    // old values for second 74HC165 chip
-byte incoming2;        // new values for first 74HC165 chip
+//byte old_incoming2;    // old values for second 74HC165 chip
+//byte incoming2;        // new values for first 74HC165 chip
 int LEDpattern1;       // LED Pattern to send to the first 74hc595
 int LEDpattern2;       // LED Pattern to send to the second 74hc595
 int LEDArray[8] = {B00000001, B00000010, B00000100, B00001000, B00010000, B00100000,B01000000,B10000000};
 
+
+
 void setup()
 {
- 
+   // Setup i2c LCD
+  lcd.init();
+  lcd.backlight();
+	lcd.clear();
+	lcd.setCursor(0,0);
+	lcd.print("Initiating ...");
+  delay(2000);
+  lcd.clear();
+    
   // Setup Serial Monitor
   Serial.begin(9600);
-  Serial.println("Starting");
+  Serial.println("Initiating ..");
 
   // Setup 74HC165 Serial connections
   pinMode(ploadPin, OUTPUT);
@@ -123,6 +140,8 @@ void setup()
   LEDpattern1 = B00000000;
   LEDpattern2 = B00000000;  
   set_LEDS ();  
+
+  lcd.print("Ready  ..... ");
 }
 
 void read_values() {
@@ -141,7 +160,7 @@ void read_values() {
   digitalWrite(clockEnablePin, LOW);
   incoming1 = shiftIn(dataPin, clockPin, MSBFIRST);
 //  incoming2 = shiftIn(dataPin, clockPin, MSBFIRST); 
-   incoming2 = 0;
+//   incoming2 = 0;
   digitalWrite(clockEnablePin, HIGH);
 }
 
@@ -161,100 +180,129 @@ void move_points ( ) {
     switch (incoming1) {
   
       case B00000001:
+        lcd.clear();
+        lcd.home();
         Serial.print("One : ");
+        lcd.print("One : ");
+        lcd.setCursor(0,1);
         Serial.println(incoming1, BIN);
+        lcd.print(incoming1, BIN);
         break;
 
       case B00000010:
+        lcd.clear();
+        lcd.home();
         Serial.print("Two : ");
-        Serial.println(incoming1, BIN);          
+        lcd.print("Two : ");
+        lcd.setCursor(0,1);
+        Serial.println(incoming1, BIN);
+        lcd.print(incoming1, BIN); 
         break;
 
       case B00000100:
+        lcd.clear();
+        lcd.home();
         Serial.print("Three : ");
-        Serial.println(incoming1, BIN);     
-        delay(500);      
+        lcd.print("Three : ");
+        lcd.setCursor(0,1);
+        Serial.println(incoming1, BIN);
+        lcd.print(incoming1, BIN);
         break;
 
       case B00001000:
+        lcd.clear();
+        lcd.home();
         Serial.print("Four : ");
-        Serial.println(incoming1, BIN);       
+        lcd.print("Four : ");
+        lcd.setCursor(0,1);
+        Serial.println(incoming1, BIN);
+        lcd.print(incoming1, BIN);
         break;
 
       case B00010000:
         Serial.print("Five : ");
-        Serial.println(incoming1, BIN);   
+        Serial.println(incoming1, BIN);
+        lcd.clear();
+        lcd.print(incoming1, BIN);  
         break;
   
       case B00100000:
         Serial.print("Six : ");
-        Serial.println(incoming1, BIN);   
+        Serial.println(incoming1, BIN);
+        lcd.clear();
+        lcd.print(incoming1, BIN); 
         break;
 
       case B01000000:
         Serial.print("Seven : ");
-        Serial.println(incoming1, BIN);   
+        Serial.println(incoming1, BIN);
+        lcd.clear();
+        lcd.print(incoming1, BIN);  
         break;
       
       case B10000000:
         Serial.print("Eight : ");
-        Serial.println(incoming1, BIN);   
+        Serial.println(incoming1, BIN);
+        lcd.clear();
+        lcd.print(incoming1, BIN);  
         break;
         
       default:
         Serial.print ( "74HC165-1 Default: ");
         Serial.println(incoming1, BIN);
+        lcd.clear();
+        lcd.print(incoming1, BIN);
         break;    
     }
-  } else if (incoming2 > 0 ) {
-    switch (incoming2) {
+  // } else if (incoming2 > 0 ) {
+  //   switch (incoming2) {
       
-      case B00000001:
-        Serial.print("Nine : ");
-        Serial.println(incoming2, BIN);   
-        break;
+  //     case B00000001:
+  //       Serial.print("Nine : ");
+  //       Serial.println(incoming2, BIN);   
+  //       break;
 
-      case B00000010:
-        Serial.print("Ten : ");
-        Serial.println(incoming2, BIN);   
-        break;
+  //     case B00000010:
+  //       Serial.print("Ten : ");
+  //       Serial.println(incoming2, BIN);   
+  //       break;
 
-      case B00000100:
-        Serial.print("Eleven : ");
-        Serial.println(incoming2, BIN);   
-        break;
+  //     case B00000100:
+  //       Serial.print("Eleven : ");
+  //       Serial.println(incoming2, BIN);   
+  //       break;
 
-      case B00001000:
-        Serial.print("Twelve : ");
-        Serial.println(incoming2, BIN);   
-        break;
+  //     case B00001000:
+  //       Serial.print("Twelve : ");
+  //       Serial.println(incoming2, BIN);   
+  //       break;
 
-      case B00010000:
-        Serial.print("Thirteen : ");
-        Serial.println(incoming2, BIN);
-        break;
+  //     case B00010000:
+  //       Serial.print("Thirteen : ");
+  //       Serial.println(incoming2, BIN);
+  //       break;
   
-      case B00100000:
-        Serial.print("Fourteen : ");
-        Serial.println(incoming2, BIN);
-        break;
+  //     case B00100000:
+  //       Serial.print("Fourteen : ");
+  //       Serial.println(incoming2, BIN);
+  //       break;
 
-      case B01000000:
-        Serial.print("Fifteen : ");
-        Serial.println(incoming2, BIN);  
-        break;
+  //     case B01000000:
+  //       Serial.print("Fifteen : ");
+  //       Serial.println(incoming2, BIN);  
+  //       break;
       
-      case B10000000:
-        Serial.print("Sixteen : ");
-        Serial.println(incoming2, BIN);  
-        break;
+  //     case B10000000:
+  //       Serial.print("Sixteen : ");
+  //       Serial.println(incoming2, BIN);  
+  //       break;
         
-      default:
-        Serial.print (" 74HC165-2 Default: ");
-        Serial.println(incoming2, BIN);
-        break;    
-    }
-  }
+  //     default:
+  //       Serial.print (" 74HC165-2 Default: ");
+  //       Serial.println(incoming2, BIN);
+  //       break;    
+  //   }
+   }
 
 }
 
@@ -274,11 +322,12 @@ void move_servo (Adafruit_PWMServoDriver pwmcard, int srv,int ang)  {
 void loop()
 {
   read_values();
-  if (incoming1 != old_incoming1 || incoming2 != old_incoming2) {
+  if (incoming1 != old_incoming1 ) {  
+ // if (incoming1 != old_incoming1 || incoming2 != old_incoming2) {
     move_points();
     old_incoming1 = incoming1;
-    old_incoming2 = incoming2;
-    set_LEDS();
+ //   old_incoming2 = incoming2;
+ //   set_LEDS();
   }
   delay(200);
 }
