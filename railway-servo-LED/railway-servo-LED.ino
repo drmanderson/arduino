@@ -9,7 +9,6 @@ LiquidCrystal_I2C lcd(0x27,20,4);
 // Setup pwm objects and their addresses
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
-Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42);
 
 #define NUMSERVOS  12 // Enter the number of servos being controlled
 #define SERVOMIN  125 // this is the 'minimum' pulse length count (out of 4096)
@@ -89,12 +88,10 @@ void setup()
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
   pwm1.begin();
   pwm1.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
-  pwm2.begin();
-  pwm2.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 
   // Setup NUMSERVOS servos
   // Remember to update ths number when new servos are added.
-    servo[0].pwmcard = pwm2;
+    servo[0].pwmcard = pwm1;
     servo[0].pwmcard_socket = 0;
     servo[0].openangle = 115;
     servo[0].closeangle = 45;
