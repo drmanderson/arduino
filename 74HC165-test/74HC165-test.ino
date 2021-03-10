@@ -15,7 +15,7 @@ BYTES_VAL_T oldPinValues;                 // old values for  74HC165 chips
 
 BYTES_VAL_T read_values() {
 
-  unsigned long bitVal;
+  BYTES_VAL_T bitVal;
   BYTES_VAL_T bytesVal = 0;
   
   // Write pulse to load pin
@@ -32,7 +32,8 @@ BYTES_VAL_T read_values() {
     bitVal = digitalRead(dataPin);
     /* Set the corresponding bit in bytesVal
      */
-    bytesVal |= (bitVal << (DATA_WIDTH-1 - i));
+     
+     bytesVal |= (bitVal << (DATA_WIDTH-1 - i));
 
     /* Pulse the Clock - rising edge shifts next bit in
      */
@@ -41,31 +42,22 @@ BYTES_VAL_T read_values() {
     digitalWrite(clockPin, LOW);
   }
 
-
   return(bytesVal);
 }
 
-void display_pin_values() {
-  
-  Serial.print("Pin states:\r\n");
+void move_points() {
+    
   
   for (int i=0;i< DATA_WIDTH; i++){
-    Serial.print(" Pin-");
-    Serial.print(i);
-    Serial.print(": ");
+    if ((pinValues >> i) & 1) {
+      Serial.print("Switch: ");
+      Serial.print(i+1);
+      Serial.print(" : triggered");
+      Serial.print("\r\n");
+    }
 
-    if ((pinValues >> i) & 1)
-      Serial.print("HIGH");
-    else
-      Serial.print("LOW");
-
-    Serial.print("\r\n");
   }
-
-  Serial.print("\r\n");
 }
-
-
 
 void setup()
 {
@@ -83,14 +75,6 @@ void setup()
   // Required initial states of these two pins according to the datasheet timing diagram
   digitalWrite(clockPin, LOW);
   digitalWrite(ploadPin,HIGH);
-
-  /*
-   * Read in and display pin states
-   */
-
-  pinValues = read_values();
-  display_pin_values();
-  oldPinValues = pinValues;
 }
 
 void loop(){
@@ -104,10 +88,9 @@ void loop(){
     * If there is a change of state display the changed ones.
     */
   if (pinValues != oldPinValues) {
-    Serial.print("*Pin value change detected* \r\n");
-    display_pin_values();
+    move_points();
     oldPinValues = pinValues;
   }
   
-  delay(5);
+  delay(200);
 }
