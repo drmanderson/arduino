@@ -46,8 +46,6 @@ BYTES_VAL_T read_values() {
 }
 
 void move_points() {
-    
-  
   for (int i=0;i< DATA_WIDTH; i++){
     if ((pinValues >> i) & 1) {
       Serial.print("Switch: ");
