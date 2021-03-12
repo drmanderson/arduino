@@ -1,3 +1,15 @@
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27,20,4); 
+
+// include the PWMServo library
+#include <Adafruit_PWMServoDriver.h>
+
+// Setup pwm objects and their addresses
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
+Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
+
 // HARDWARE CONNECTIONS
 // Connect the following pins between your Arduino and the 74HC165 Breakout Board
 // Connect pins A-H to 5V or GND or switches or whatever
@@ -9,9 +21,19 @@ const int ploadPin        = 7;  // Connects to Parallel load pin the 165 (1)
 #define BYTES_VAL_T unsigned long 
 #define NUMBER_OF_CHIPS 3
 #define DATA_WIDTH NUMBER_OF_CHIPS * 8
+#define NUMSERVOS 5
 
-BYTES_VAL_T pinValues;                    // new values for  74HC165 chips
-BYTES_VAL_T oldPinValues;                 // old values for  74HC165 chips
+struct ServoData {
+  Adafruit_PWMServoDriver  pwmcard;        // PCA9685 card number
+  int  pwmcard_socket; // Socket on PCA9685 card
+  int  openangle;      // User Configurable servo angle for open point
+  int  closeangle;     // User Configurable servo angle for close point
+};
+ServoData servo[NUMSERVOS];
+
+
+BYTES_VAL_T pinValues = 0;                    // new values for  74HC165 chips
+BYTES_VAL_T oldPinValues = 0 ;                 // old values for  74HC165 chips
 
 BYTES_VAL_T read_values() {
 
@@ -45,50 +67,59 @@ BYTES_VAL_T read_values() {
   return(bytesVal);
 }
 
-void move_points() {
-  for (int i=0;i< DATA_WIDTH; i++){
-    if ((pinValues >> i) & 1) {
-      Serial.print("Switch: ");
-      Serial.print(i+1);
-      Serial.print(" : triggered");
-      Serial.print("\r\n");
-    }
+void move_points(int switchNum) {
+  switch(switchNum){
+    case 1:
+      // Button "1:" - close juction one
+      Serial.println("Button one triggered");
+      break; 
 
+    case 2:
+      // Button "1:" - close juction one
+      Serial.println("Button two triggered");
+      break;              
+
+    case 3:
+      // Button "1:" - close juction one
+      Serial.println("Button two triggered");
+      break;   
+  
+    case 4:
+    // Button "1:" - close juction one
+    Serial.println("Button two triggered");
+    break; 
+  
+  
+  
   }
 }
 
 void setup()
 {
- 
   // Setup Serial Monitor
   Serial.begin(9600);
   Serial.println("Starting");
-
   // Setup 74HC165 Serial connections
   pinMode(ploadPin, OUTPUT);
   pinMode(clockEnablePin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, INPUT);
-
   // Required initial states of these two pins according to the datasheet timing diagram
   digitalWrite(clockPin, LOW);
   digitalWrite(ploadPin,HIGH);
 }
 
 void loop(){
-  /*
-   * Read in the state of all zones
-   */
-
-   pinValues = read_values();
-
-   /*
-    * If there is a change of state display the changed ones.
-    */
+  // Read all pin values
+  pinValues = read_values();
+  // Process any changes in the values and call to move_points
   if (pinValues != oldPinValues) {
-    move_points();
+    for (int i=0;i< DATA_WIDTH; i++){
+      if ((pinValues >> i) & 1) {
+        move_points(i);
+      }
+   }
     oldPinValues = pinValues;
   }
-  
   delay(200);
 }
