@@ -7,20 +7,26 @@ LiquidCrystal_I2C lcd(0x27,20,4);
 #include <Adafruit_PWMServoDriver.h>
 
 // Setup pwm objects and their addresses
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
-Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x42);
+Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x42);
 
+// Lets put our defines here.
 #define NUMSERVOS  12 // Enter the number of servos being controlled
 #define SERVOMIN  125 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  575 // this is the 'maximum' pulse length count (out of 4096)
+#define BYTES_VAL_T unsigned long
+#define NUMBER_OF_CHIPS 3
+#define DATA_WIDTH NUMBER_OF_CHIPS * 8
 
-// Setup servio struct that holds pwm card, socket number and open/close angles.
+
+// Setup servo struct that holds pwm card, socket number and open/close angles.
 struct ServoData {
   Adafruit_PWMServoDriver  pwmcard;        // PCA9685 card number
   byte  pwmcard_socket; // Socket on PCA9685 card
   byte  openangle;      // User Configurable servo angle for open point
   byte  closeangle;     // User Configurable servo angle for close point
 };
+
 ServoData servo[NUMSERVOS];
 
 // For each 74HC595 there needs to be a LEDpatternx up to 4
@@ -28,13 +34,13 @@ ServoData servo[NUMSERVOS];
 // For multiple chips the loops in read_values, set_LEDS and the if case structure in move_points
 // will have to be extened accordingly for the new chips (3 and 4).
 
-int clockEnablePin  = 4;  // Connects to Clock Enable pin the 165 (15)
-int dataPin         = 5;  // Connects to the Q7 pin the 165 (9)
-int clockPin        = 6;  // Connects to the Clock pin the 165 (2)
-int ploadPin        = 7;  // Connects to Parallel load pin the 165 (1)
-int latchPinOut     = 9;  // Connects to the RCLK pin of the 595 (12)  ST_CP
-int clockPinOut     = 10;  // Connects to the SRCLK ping of the 595 (11) SH_CP
-int dataPinOut      = 11;  // Connects to the SER pin of the 595 (14) DS
+const int clockEnablePin  = 4;  // Connects to Clock Enable pin the 165 (15)
+const int dataPin         = 5;  // Connects to the Q7 pin the 165 (9)
+const int clockPin        = 6;  // Connects to the Clock pin the 165 (2)
+const int ploadPin        = 7;  // Connects to Parallel load pin the 165 (1)
+const int latchPinOut     = 9;  // Connects to the RCLK pin of the 595 (12)  ST_CP
+const int clockPinOut     = 10;  // Connects to the SRCLK ping of the 595 (11) SH_CP
+const int dataPinOut      = 11;  // Connects to the SER pin of the 595 (14) DS
 byte old_incoming1;    // old values for first 74HC165 chip
 byte incoming1;        // new values for first 74HC165 chip
 byte old_incoming2;    // old values for second 74HC165 chip
@@ -42,6 +48,40 @@ byte incoming2;        // new values for first 74HC165 chip
 int LEDpattern1;       // LED Pattern to send to the first 74hc595
 int LEDpattern2;       // LED Pattern to send to the second 74hc595
 int LEDArray[8] = {B00000001, B00000010, B00000100, B00001000, B00010000, B00100000,B01000000,B10000000};
+
+// Setup initial values
+BYTES_VAL_T pinValues = 0;                    // new values for  74HC165 chips
+BYTES_VAL_T oldPinValues = 0 ;                 // old values for  74HC165 chips
+
+BYTES_VAL_T read_values() {
+
+  BYTES_VAL_T bitVal;
+  BYTES_VAL_T bytesVal = 0;
+
+  // Write pulse to load pin
+  digitalWrite(clockEnablePin, HIGH);
+  digitalWrite(ploadPin, LOW);
+  delayMicroseconds(5);
+  digitalWrite(ploadPin, HIGH);
+  digitalWrite(clockEnablePin, LOW);
+
+  // Get data from 74HC165 chips
+  pinMode(clockPin, OUTPUT);
+  pinMode(dataPin, INPUT);
+  for (int i=0; i < DATA_WIDTH; i++) {
+    // Read value in
+    bitVal = digitalRead(dataPin);
+
+    //Set the corresponding bit in bytesVal
+    bytesVal |= (bitVal << (DATA_WIDTH-1 - i));
+
+    //Pulse the Clock - rising edge shifts next bit in
+    digitalWrite(clockPin, HIGH);
+    delayMicroseconds(1);
+    digitalWrite(clockPin, LOW);
+  }
+  return(bytesVal);
+}
 
 void setup()
 {
@@ -62,8 +102,8 @@ void setup()
   pinMode(clockEnablePin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, INPUT);
- // Required initial states of these two pins according to the datasheet timing diagram
-  digitalWrite(clockPin, HIGH);
+  // Required initial states of these two pins according to the datasheet timing diagram
+  digitalWrite(clockPin, LOW);
   digitalWrite(ploadPin,HIGH);
 
   // Setup 74HC696 serial connections
@@ -73,9 +113,6 @@ void setup()
   // Initialise first 74HC165 values.
   // For one chip only use incoming1.
   // For two chips use incoming1 and incoming2 etc
-  read_values();
-  old_incoming1 = incoming1;
-  old_incoming2 = incoming2;
 
   // initialise the 74HC595 with all LED off B00000000
   LEDpattern1 = B00000000;
@@ -172,23 +209,6 @@ void setup()
   Serial.println("Setup done.");
 }
 
-void read_values() {
-  // Write pulse to load pin
-  digitalWrite(ploadPin, LOW);
-  delayMicroseconds(5);
-  digitalWrite(ploadPin, HIGH);
-  delayMicroseconds(5);
-
-  // Get data from 74HC165 chips
-  pinMode(clockPin, OUTPUT);
-  pinMode(dataPin, INPUT);  
-  digitalWrite(clockPin, HIGH);
-  digitalWrite(clockEnablePin, LOW);
-  incoming1 = shiftIn(dataPin, clockPin, MSBFIRST);
-  incoming2 = shiftIn(dataPin, clockPin, MSBFIRST);
-  digitalWrite(clockEnablePin, HIGH);
-}
-
 void set_LEDS () {
   // Set the LEDS that are on / off
   digitalWrite(latchPinOut, LOW);
@@ -197,244 +217,308 @@ void set_LEDS () {
   digitalWrite (latchPinOut, HIGH);
 }
 
-void move_points ( ) {
-  // Print to serial monitor
+void move_points ( int switchNum) {
   // Move either one or two servos based on which button has been pressed
-  if (incoming1 > 0 ) {
-    switch (incoming1) {
+  switch(switchNum){
 
-      case B00000001:
+      case 0:
         // Button "1:" - close juction one
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 1.   74HC615-1 BIN value : ");
-        Serial.println(incoming1, BIN);
+        Serial.print("Button 1.");
         move_servo (servo[0].pwmcard, servo[0].pwmcard_socket, servo[0].closeangle);
         move_servo (servo[1].pwmcard, servo[1].pwmcard_socket, servo[1].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,0);
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Closing - one ");
         delay(500);
         break;
 
-      case B00000010:
+      case 1:
         // Button "2" - open juntion one
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 2.   74HC615-1 BIN value : ");
-        Serial.println(incoming1, BIN);
+        Serial.print("Button 2.");
         move_servo (servo[0].pwmcard, servo[0].pwmcard_socket, servo[0].openangle);
         move_servo (servo[1].pwmcard, servo[1].pwmcard_socket, servo[1].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[0];
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Opening - one");
         delay(500);
         break;
 
-      case B00000100:
+      case 2:
         // Button "3" - close Juction two
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 3.   74HC615-1 BIN value : ");
-        Serial.println(incoming1, BIN);
+        Serial.print("Button 3.");
         move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].closeangle);
         move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,0);
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Closing - two");
         delay(500);
         break;
 
-      case B00001000:
+      case 3:
         // Button "4" - open Juction two
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 4.   74HC615-1 BIN value : ");
-        Serial.println(incoming1, BIN);
+        Serial.print("Button 4.");
         move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].openangle);
         move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[1];
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Opening - two");
         delay(500);
         break;
 
-      case B00010000:
+      case 4:
         // Button "5" - open Juction three
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 5.   74HC615-1 BIN value : ");
-        Serial.println(incoming1, BIN);
+        Serial.print("Button 5.");
         move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].closeangle);
         LEDpattern1 = LEDpattern1 | LEDArray[2];
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Closing - three ");
         delay(500);
         break;
 
-      case B00100000:
+      case 5:
         // Button "6" - close Juction three
         lcd.clear();
         lcd.home();
-        Serial.print("Button 6.   74HC615-1 BIN value : ");
-        Serial.println(incoming1, BIN);
+        Serial.print("Button 6.");
         move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].openangle);
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Opening - three");
         delay(500);
         break;
 
-      case B01000000:
-        // Button "7" - open Juction four      
+      case 6:
+        // Button "7" - close Juction four
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 7.   74HC615-1 BIN value : ");
-        Serial.println(incoming1, BIN);
+        Serial.print("Button 7.");
+        move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].closeangle);
+        set_LEDS();
+        lcd.print("Closing - four ");
+        delay(500);
+        break;
+
+      case 7:
+        // Button "8" - open Juction four
+        lcd.clear();
+        lcd.home();
+        Serial.print("Button 8.");
         move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[3];
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Opening - four");
         delay(500);
         break;
 
-      case B10000000:
-        // Button "8" - open Juction four      
-        lcd.clear();
-        lcd.home();      
-        Serial.print("Buton 8.   74HC615-1 BIN value : ");
-        Serial.println(incoming1, BIN);
-        move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].closeangle);
-        LEDpattern1 = bitClear(LEDpattern1,1);
-        set_LEDS();
-        lcd.print("Closing - two ");
-        delay(500);
-        break;
-
-      default:
-        // default - it's broken 
+      case 8:
+        // Button "9" - close Juction five
         lcd.clear();
         lcd.home();
-        Serial.print ("Failure - 74HC165-1 : ");
-        Serial.println(incoming1, BIN);
-        lcd.print("Failure...");
-        break;
-    }
-  } else if (incoming2 > 0 ) {
-    switch (incoming2) {
-
-      case B00000001:
-        // Button "9" - open Juction five     
-        lcd.clear();
-        lcd.home();
-        Serial.print("Buton 9.   74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN);
-         move_servo (servo[7].pwmcard, servo[7].pwmcard_socket, servo[7].openangle);
-        LEDpattern1 = LEDpattern1 | LEDArray[1];
-        set_LEDS();
-        lcd.print("Closing - two ");
-        delay(500);
-        break;
-
-      case B00000010:
-        // Button "10" - close Juction five
-        lcd.clear();
-        lcd.home();
-        Serial.print("Buton 10.  74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN);
+        Serial.print("Button 9.");
         move_servo (servo[7].pwmcard, servo[7].pwmcard_socket, servo[7].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,1);
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Closing - five");
         delay(500);
         break;
 
-      case B00000100:
-        // Button "11" - open Juction six
-        lcd.clear(); 
+      case 9:
+        // Button "10" - open Juction five
+        lcd.clear();
         lcd.home();
-        Serial.print("Buton 11.  74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN);
-         move_servo (servo[8].pwmcard, servo[8].pwmcard_socket, servo[8].openangle);
+        Serial.print("Button 10.");
+        move_servo (servo[7].pwmcard, servo[7].pwmcard_socket, servo[7].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[1];
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Opening - five ");
         delay(500);
         break;
 
-      case B00001000:
+      case 10:
+        // Button "11" - open Juction six
+        lcd.clear();
+        lcd.home();
+        Serial.print("Buton 11.");
+        move_servo (servo[8].pwmcard, servo[8].pwmcard_socket, servo[8].openangle);
+        LEDpattern1 = LEDpattern1 | LEDArray[1];
+        set_LEDS();
+        lcd.print("Opening - six ");
+        delay(500);
+        break;
+
+      case 11:
         // Button "12" - close Juction six
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 12.  74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN);
+        Serial.print("Buton 12.");
         move_servo (servo[8].pwmcard, servo[8].pwmcard_socket, servo[8].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,1);
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Closing - six ");
         delay(500);
         break;
 
-      case B00010000:
+      case 12:
         // Button "13" - open Juction seven
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 13.  74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN);
+        Serial.print("Buton 13.");
         move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].closeangle);
         LEDpattern2 = bitClear(LEDpattern2,6);
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Opening - seven ");
         delay(500);
         break;
 
-      case B00100000:
+      case 13:
         // Button "14" - close Juction seven
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 14.  74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN);
+        Serial.print("Buton 14.");
         move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].openangle);
         LEDpattern2 = bitClear(LEDpattern2,6);
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Closing - seven ");
         delay(500);
         break;
 
-      case B01000000:
+      case 14:
         // Button "15" - open Juction eight
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 15.  74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN);
+        Serial.print("Buton 15.");
         move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].openangle);
         LEDpattern2 = LEDpattern2 | LEDArray[6];
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Opening - eight");
         delay(500);
         break;
 
-      case B10000000:
+      case 15:
         // Button "16" - close Juction eight
         lcd.clear();
         lcd.home();
-        Serial.print("Buton 16.  74HC615-2 BIN value : ");
-        Serial.println(incoming2, BIN);
+        Serial.print("Buton 16.");
         move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].closeangle);
         LEDpattern2 = bitClear(LEDpattern2,7);
         set_LEDS();
-        lcd.print("Closing - two ");
+        lcd.print("Closing - eight ");
         delay(500);
         break;
 
+      case 16:
+        // Button "17" - open Juction nine
+        lcd.clear();
+        lcd.home();
+        Serial.print("Buton 17.");
+        move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].openangle);
+        LEDpattern2 = LEDpattern2 | LEDArray[6];
+        set_LEDS();
+        lcd.print("Opening - nine");
+        delay(500);
+        break;
+
+      case 17:
+        // Button "18" - close Juction nine
+        lcd.clear();
+        lcd.home();
+        Serial.print("Buton 18.");
+        move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].closeangle);
+        LEDpattern2 = bitClear(LEDpattern2,7);
+        set_LEDS();
+        lcd.print("Closing - nine ");
+        delay(500);
+        break;
+
+      case 18:
+        // Button "19" - open Juction ten
+        lcd.clear();
+        lcd.home();
+        Serial.print("Buton 19.");
+        move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].openangle);
+        LEDpattern2 = LEDpattern2 | LEDArray[6];
+        set_LEDS();
+        lcd.print("Opening - ten ");
+        delay(500);
+        break;
+
+      case 19:
+        // Button "20" - close Juction ten
+        lcd.clear();
+        lcd.home();
+        Serial.print("Buton 20.");
+        move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].closeangle);
+        LEDpattern2 = bitClear(LEDpattern2,7);
+        set_LEDS();
+        lcd.print("Closing - ten ");
+        delay(500);
+        break;      
+
+      case 20:
+        // Button "21" - open Juction eleven
+        lcd.clear();
+        lcd.home();
+        Serial.print("Buton 21.");
+        move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].openangle);
+        LEDpattern2 = LEDpattern2 | LEDArray[6];
+        set_LEDS();
+        lcd.print("Opening - eleven");
+        delay(500);
+        break;
+
+      case 21:
+        // Button "22" - close Juction eleven
+        lcd.clear();
+        lcd.home();
+        Serial.print("Buton 22.");
+        move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].closeangle);
+        LEDpattern2 = bitClear(LEDpattern2,7);
+        set_LEDS();
+        lcd.print("Closing - eleven ");
+        delay(500);
+        break;      
+
+      case 22:
+        // Button "23" - open Juction twelve
+        lcd.clear();
+        lcd.home();
+        Serial.print("Buton 21.");
+        move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].openangle);
+        LEDpattern2 = LEDpattern2 | LEDArray[6];
+        set_LEDS();
+        lcd.print("Opening - twelve");
+        delay(500);
+        break;
+
+      case 23:
+        // Button 24 - close Juction twelve
+        lcd.clear();
+        lcd.home();
+        Serial.print("Buton 22.");
+        move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].closeangle);
+        LEDpattern2 = bitClear(LEDpattern2,7);
+        set_LEDS();
+        lcd.print("Closing - twelve");
+        delay(500);
+        break;   
+
       default:
-         // default - it's broken 
+         // default - it's broken
         lcd.clear();
         lcd.home();
         Serial.print ("74HC165-2 Default: ");
         Serial.println(incoming2, BIN);
         lcd.print("Failure...");
         break;
-    }
   }
 
 }
@@ -454,15 +538,17 @@ void move_servo (Adafruit_PWMServoDriver pwmcard, int srv,int ang)  {
 
 void loop()
 {
-  read_values();
-  // Check to see if values have changed
-  if (incoming1 != old_incoming1 || incoming2 != old_incoming2) {
-    // yes values have changed lets move points
-    move_points();
-    // Update values
-    old_incoming1 = incoming1;
-    old_incoming2 = incoming2;
-    // adjust LED to reflect changed point positions
+  // Read all pin values
+  pinValues = read_values();
+  // Process any changes in the values and call to move_points
+  if (pinValues != oldPinValues) {
+    for (int i=0;i< DATA_WIDTH; i++){
+      if ((pinValues >> i) & 1) {
+        move_points(i);
+      }
+   }
+    oldPinValues = pinValues;
+    // Set LED to reflect new settings
     set_LEDS();
   }
   delay(200);

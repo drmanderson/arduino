@@ -2,7 +2,7 @@
     "sketch": "railway-servo-LED.ino",
     "output": "../build",
     "programmer": "AVR ISP",
-    "port": "/dev/cu.usbserial-14410",
+    "port": "/dev/cu.usbserial-142130",
     "board": "arduino:avr:nano",
     "configuration": "cpu=atmega328"
 }
