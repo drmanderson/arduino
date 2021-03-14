@@ -63,7 +63,6 @@ BYTES_VAL_T read_values() {
     delayMicroseconds(1);
     digitalWrite(clockPin, LOW);
   }
-
   return(bytesVal);
 }
 
@@ -75,22 +74,124 @@ void move_points(int switchNum) {
       break; 
 
     case 2:
-      // Button "1:" - close juction one
+      // Button "2:" - open juction one
       Serial.println("Button two triggered");
       break;              
 
     case 3:
-      // Button "1:" - close juction one
-      Serial.println("Button two triggered");
+      // Button "3:" - close juction two
+      Serial.println("Button three triggered");
       break;   
   
     case 4:
-    // Button "1:" - close juction one
-    Serial.println("Button two triggered");
-    break; 
+      // Button "4:" - open juction two
+      Serial.println("Button four triggered");
+      break; 
   
+    case 5:
+      // Button "5:" - close juction one
+      Serial.println("Button five triggered");
+      break; 
+
+    case 6:
+      // Button "6:" - close juction one
+      Serial.println("Button six triggered");
+      break;              
+
+    case 7:
+      // Button "7:" - close juction one
+      Serial.println("Button seven triggered");
+      break;   
   
+    case 8:
+      // Button "8:" - close juction one
+      Serial.println("Button eight triggered");
+      break;
+
+    case 9:
+      // Button "1:" - close juction one
+      Serial.println("Button nine triggered");
+      break; 
+
+    case 10:
+      // Button "2:" - open juction one
+      Serial.println("Button ten triggered");
+      break;              
+
+    case 11:
+      // Button "3:" - close juction two
+      Serial.println("Button eleven triggered");
+      break;   
   
+    case 12:
+      // Button "4:" - open juction two
+      Serial.println("Button twelve triggered");
+      break; 
+  
+    case 13:
+      // Button "5:" - close juction one
+      Serial.println("Button thirteen triggered");
+      break; 
+
+    case 14:
+      // Button "6:" - close juction one
+      Serial.println("Button fourteen triggered");
+      break;              
+
+    case 15:
+      // Button "7:" - close juction one
+      Serial.println("Button fifteen triggered");
+      break;   
+  
+    case 16:
+      // Button "8:" - close juction one
+      Serial.println("Button sixteen triggered");
+      break;  
+
+    case 17:
+      // Button "8:" - close juction one
+      Serial.println("Button seventeen triggered");
+      break;
+
+    case 18:
+      // Button "1:" - close juction one
+      Serial.println("Button eighteen triggered");
+      break; 
+
+    case 19:
+      // Button "2:" - open juction one
+      Serial.println("Button nineteen triggered");
+      break;              
+
+    case 20:
+      // Button "3:" - close juction two
+      Serial.println("Button twenty triggered");
+      break;   
+  
+    case 21:
+      // Button "4:" - open juction two
+      Serial.println("Button twentyone triggered");
+      break; 
+  
+    case 22:
+      // Button "5:" - close juction one
+      Serial.println("Button twentytwo triggered");
+      break; 
+
+    case 23:
+      // Button "6:" - close juction one
+      Serial.println("Button twentythree triggered");
+      break;              
+
+    case 24:
+      // Button "7:" - close juction one
+      Serial.println("Button twentyfour triggered");
+      break;   
+  
+    default:
+      // Button "8:" - close juction one
+      Serial.println("default");
+      break;       
   }
 }
 
@@ -116,6 +217,7 @@ void loop(){
   if (pinValues != oldPinValues) {
     for (int i=0;i< DATA_WIDTH; i++){
       if ((pinValues >> i) & 1) {
+        Serial.println("i");
         move_points(i);
       }
    }
