@@ -208,6 +208,7 @@ void setup()
   // Required initial states of these two pins according to the datasheet timing diagram
   digitalWrite(clockPin, LOW);
   digitalWrite(ploadPin,HIGH);
+  Serial.println("Done.");
 }
 
 void loop(){
