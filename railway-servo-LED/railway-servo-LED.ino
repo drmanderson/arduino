@@ -129,58 +129,58 @@ void setup()
 
     servo[1].pwmcard = pwm;
     servo[1].pwmcard_socket = 1;
-    servo[1].openangle = 145;
+    servo[1].openangle = 110;
     servo[1].closeangle = 70;
 
     servo[2].pwmcard = pwm1;
     servo[2].pwmcard_socket = 1;
-    servo[2].openangle = 60;
-    servo[2].closeangle = 135;
+    servo[2].openangle = 70;
+    servo[2].closeangle = 125;
 
     servo[3].pwmcard = pwm1;
     servo[3].pwmcard_socket = 2;
-    servo[3].openangle = 60;
-    servo[3].closeangle = 134;
+    servo[3].openangle = 70;
+    servo[3].closeangle = 140;
 
     servo[4].pwmcard = pwm;
     servo[4].pwmcard_socket = 2;
-    servo[4].openangle = 135;
-    servo[4].closeangle = 60;
+    servo[4].openangle = 110;
+    servo[4].closeangle = 70;
 
     servo[5].pwmcard = pwm1;
     servo[5].pwmcard_socket = 3;
-    servo[5].openangle = 60;
-    servo[5].closeangle = 134;
+    servo[5].openangle = 130;
+    servo[5].closeangle = 70;
 
     servo[6].pwmcard = pwm1;
     servo[6].pwmcard_socket = 4;
-    servo[6].openangle = 60;
-    servo[6].closeangle = 134;
+    servo[6].openangle = 70;
+    servo[6].closeangle = 110;
 
     servo[7].pwmcard = pwm1;
     servo[7].pwmcard_socket = 5;
     servo[7].openangle = 70;
-    servo[7].closeangle = 130;
+    servo[7].closeangle = 110;
 
     servo[8].pwmcard = pwm1;
     servo[8].pwmcard_socket = 6;
-    servo[8].openangle = 40;
+    servo[8].openangle = 70;
     servo[8].closeangle = 110;
 
     servo[9].pwmcard = pwm1;
     servo[9].pwmcard_socket = 7;
-    servo[9].openangle = 70;
-    servo[9].closeangle = 110;
+    servo[9].openangle = 120;
+    servo[9].closeangle = 65;
 
     servo[10].pwmcard = pwm1;
     servo[10].pwmcard_socket = 8;
-    servo[10].openangle = 70;
-    servo[10].closeangle = 110;
+    servo[10].openangle = 110;
+    servo[10].closeangle = 70;
 
     servo[11].pwmcard = pwm1;
     servo[11].pwmcard_socket = 9;
     servo[11].openangle = 70;
-    servo[11].closeangle = 110;
+    servo[11].closeangle = 137;
 
 
 // Start board in safe positions with all junctions "closed"
