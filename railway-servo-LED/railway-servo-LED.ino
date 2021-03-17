@@ -122,13 +122,13 @@ void setup()
 
   // Setup NUMSERVOS servos
   // Remember to update ths number when new servos are added.
-    servo[0].pwmcard = pwm1;
+    servo[0].pwmcard = pwm;
     servo[0].pwmcard_socket = 0;
     servo[0].openangle = 115;
     servo[0].closeangle = 45;
 
     servo[1].pwmcard = pwm;
-    servo[1].pwmcard_socket = 4;
+    servo[1].pwmcard_socket = 1;
     servo[1].openangle = 145;
     servo[1].closeangle = 70;
 
@@ -138,17 +138,17 @@ void setup()
     servo[2].closeangle = 135;
 
     servo[3].pwmcard = pwm1;
-    servo[3].pwmcard_socket = 5;
+    servo[3].pwmcard_socket = 2;
     servo[3].openangle = 60;
     servo[3].closeangle = 134;
 
     servo[4].pwmcard = pwm;
-    servo[4].pwmcard_socket = 8;
+    servo[4].pwmcard_socket = 2;
     servo[4].openangle = 135;
     servo[4].closeangle = 60;
 
     servo[5].pwmcard = pwm1;
-    servo[5].pwmcard_socket = 2;
+    servo[5].pwmcard_socket = 3;
     servo[5].openangle = 60;
     servo[5].closeangle = 134;
 
@@ -158,27 +158,27 @@ void setup()
     servo[6].closeangle = 134;
 
     servo[7].pwmcard = pwm1;
-    servo[7].pwmcard_socket = 3;
+    servo[7].pwmcard_socket = 5;
     servo[7].openangle = 70;
     servo[7].closeangle = 130;
 
     servo[8].pwmcard = pwm1;
-    servo[8].pwmcard_socket = 8;
+    servo[8].pwmcard_socket = 6;
     servo[8].openangle = 40;
     servo[8].closeangle = 110;
 
     servo[9].pwmcard = pwm1;
-    servo[9].pwmcard_socket = 9;
+    servo[9].pwmcard_socket = 7;
     servo[9].openangle = 70;
     servo[9].closeangle = 110;
 
     servo[10].pwmcard = pwm1;
-    servo[10].pwmcard_socket = 12;
+    servo[10].pwmcard_socket = 8;
     servo[10].openangle = 70;
     servo[10].closeangle = 110;
 
     servo[11].pwmcard = pwm1;
-    servo[11].pwmcard_socket = 13;
+    servo[11].pwmcard_socket = 9;
     servo[11].openangle = 70;
     servo[11].closeangle = 110;
 
