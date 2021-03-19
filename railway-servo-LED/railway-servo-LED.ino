@@ -132,55 +132,56 @@ void setup()
     servo[1].openangle = 110;
     servo[1].closeangle = 70;
 
-    servo[2].pwmcard = pwm1;
-    servo[2].pwmcard_socket = 1;
-    servo[2].openangle = 70;
-    servo[2].closeangle = 125;
+    servo[2].pwmcard = pwm;
+    servo[2].pwmcard_socket = 2;
+    servo[2].openangle = 110;
+    servo[2].closeangle = 70;
 
     servo[3].pwmcard = pwm1;
-    servo[3].pwmcard_socket = 2;
+    servo[3].pwmcard_socket = 1;
     servo[3].openangle = 70;
-    servo[3].closeangle = 140;
+    servo[3].closeangle = 125;
 
-    servo[4].pwmcard = pwm;
+    servo[4].pwmcard = pwm1;
     servo[4].pwmcard_socket = 2;
-    servo[4].openangle = 110;
-    servo[4].closeangle = 70;
+    servo[4].openangle = 70;
+    servo[4].closeangle = 140;
 
     servo[5].pwmcard = pwm1;
-    servo[5].pwmcard_socket = 3;
-    servo[5].openangle = 130;
-    servo[5].closeangle = 70;
+    servo[5].pwmcard_socket = 7;
+    servo[5].openangle = 120;
+    servo[5].closeangle = 65;
 
     servo[6].pwmcard = pwm1;
-    servo[6].pwmcard_socket = 4;
-    servo[6].openangle = 70;
-    servo[6].closeangle = 110;
+    servo[6].pwmcard_socket = 8;
+    servo[6].openangle = 110;
+    servo[6].closeangle = 70;
 
     servo[7].pwmcard = pwm1;
-    servo[7].pwmcard_socket = 5;
+    servo[7].pwmcard_socket = 9;
     servo[7].openangle = 70;
-    servo[7].closeangle = 110;
-
+    servo[7].closeangle = 137;
+    
     servo[8].pwmcard = pwm1;
-    servo[8].pwmcard_socket = 6;
+    servo[8].pwmcard_socket = 4;
     servo[8].openangle = 70;
-    servo[8].closeangle = 110;
+    servo[8]closeangle = 110;
 
     servo[9].pwmcard = pwm1;
-    servo[9].pwmcard_socket = 7;
-    servo[9].openangle = 120;
-    servo[9].closeangle = 65;
+    servo[9].pwmcard_socket = 3;
+    servo[9].openangle = 130;
+    servo[9].closeangle = 70;
 
     servo[10].pwmcard = pwm1;
-    servo[10].pwmcard_socket = 8;
-    servo[10].openangle = 110;
-    servo[10].closeangle = 70;
+    servo[10].pwmcard_socket = 6;
+    servo[10].openangle = 70;
+    servo[10].closeangle = 110;
 
     servo[11].pwmcard = pwm1;
-    servo[11].pwmcard_socket = 9;
+    servo[11].pwmcard_socket = 5;
     servo[11].openangle = 70;
-    servo[11].closeangle = 137;
+    servo[11].closeangle = 110;
+
 
 
 // Start board in safe positions with all junctions "closed"
@@ -216,7 +217,7 @@ void move_points ( int switchNum) {
   switch(switchNum){
 
       case 0:
-        // Button "1:" - close juction one
+        // Button "1:" - close juction A
         lcd.clear();
         lcd.home();
         Serial.print("Button 1.");
@@ -229,7 +230,7 @@ void move_points ( int switchNum) {
         break;
 
       case 1:
-        // Button "2" - open juntion one
+        // Button "2" - open juntion A
         lcd.clear();
         lcd.home();
         Serial.print("Button 2.");
@@ -242,12 +243,11 @@ void move_points ( int switchNum) {
         break;
 
       case 2:
-        // Button "3" - close Juction two
+        // Button "3" - close Juction B
         lcd.clear();
         lcd.home();
         Serial.print("Button 3.");
         move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].closeangle);
-        move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,1);
         set_LEDS();
         lcd.print("Closing - two");
@@ -255,12 +255,11 @@ void move_points ( int switchNum) {
         break;
 
       case 3:
-        // Button "4" - open Juction two
+        // Button "4" - open Juction B
         lcd.clear();
         lcd.home();
         Serial.print("Button 4.");
         move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].openangle);
-        move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[1];
         set_LEDS();
         lcd.print("Opening - two");
@@ -268,11 +267,12 @@ void move_points ( int switchNum) {
         break;
 
       case 4:
-        // Button "5" - open Juction three
+        // Button "5" - open Juction C
         lcd.clear();
         lcd.home();
         Serial.print("Button 5.");
-        move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].closeangle);
+        move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].closeangle);
+        move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,2);
         set_LEDS();
         lcd.print("Closing - three ");
@@ -280,11 +280,12 @@ void move_points ( int switchNum) {
         break;
 
       case 5:
-        // Button "6" - close Juction three
+        // Button "6" - close Juction C
         lcd.clear();
         lcd.home();
         Serial.print("Button 6.");
-        move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].openangle);
+        move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].openangle);
+        move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[2];
         set_LEDS();
         lcd.print("Opening - three");
@@ -292,11 +293,11 @@ void move_points ( int switchNum) {
         break;
 
       case 6:
-        // Button "7" - close Juction four
+        // Button "7" - close Juction D
         lcd.clear();
         lcd.home();
         Serial.print("Button 7.");
-        move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].closeangle);
+        move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,3);
         set_LEDS();
         lcd.print("Closing - four ");
@@ -304,11 +305,11 @@ void move_points ( int switchNum) {
         break;
 
       case 7:
-        // Button "8" - open Juction four
+        // Button "8" - open Juction D
         lcd.clear();
         lcd.home();
         Serial.print("Button 8.");
-        move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].openangle);
+        move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[3];
         set_LEDS();
         lcd.print("Opening - four");
@@ -316,11 +317,11 @@ void move_points ( int switchNum) {
         break;
 
       case 8:
-        // Button "9" - close Juction five
+        // Button "9" - close Juction E
         lcd.clear();
         lcd.home();
         Serial.print("Button 9.");
-        move_servo (servo[7].pwmcard, servo[7].pwmcard_socket, servo[7].closeangle);
+        move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,4);
         set_LEDS();
         lcd.print("Closing - five");
@@ -328,11 +329,11 @@ void move_points ( int switchNum) {
         break;
 
       case 9:
-        // Button "10" - open Juction five
+        // Button "10" - open Juction E
         lcd.clear();
         lcd.home();
         Serial.print("Button 10.");
-        move_servo (servo[7].pwmcard, servo[7].pwmcard_socket, servo[7].openangle);
+        move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[4];
         set_LEDS();
         lcd.print("Opening - five ");
@@ -340,11 +341,11 @@ void move_points ( int switchNum) {
         break;
 
       case 10:
-        // Button "11" - open Juction six
+        // Button "11" - open Juction F
         lcd.clear();
         lcd.home();
         Serial.print("Buton 11.");
-        move_servo (servo[8].pwmcard, servo[8].pwmcard_socket, servo[8].openangle);
+        move_servo (servo[7].pwmcard, servo[7].pwmcard_socket, servo[7].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[5];
         set_LEDS();
         lcd.print("Opening - six ");
@@ -352,11 +353,11 @@ void move_points ( int switchNum) {
         break;
 
       case 11:
-        // Button "12" - close Juction six
+        // Button "12" - close Juction F
         lcd.clear();
         lcd.home();
         Serial.print("Buton 12.");
-        move_servo (servo[8].pwmcard, servo[8].pwmcard_socket, servo[8].closeangle);
+        move_servo (servo[7].pwmcard, servo[7].pwmcard_socket, servo[7].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,5);
         set_LEDS();
         lcd.print("Closing - six ");
@@ -364,11 +365,11 @@ void move_points ( int switchNum) {
         break;
 
       case 12:
-        // Button "13" - open Juction seven
+        // Button "13" - open Juction G
         lcd.clear();
         lcd.home();
         Serial.print("Buton 13.");
-        move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].closeangle);
+        move_servo (servo[8].pwmcard, servo[8].pwmcard_socket, servo[8].closeangle);
         LEDpattern1 = LEDpattern1 | LEDArray[6];
         set_LEDS();
         lcd.print("Opening - seven ");
@@ -376,11 +377,11 @@ void move_points ( int switchNum) {
         break;
 
       case 13:
-        // Button "14" - close Juction seven
+        // Button "14" - close Juction G
         lcd.clear();
         lcd.home();
         Serial.print("Buton 14.");
-        move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].openangle);
+        move_servo (servo[8].pwmcard, servo[8].pwmcard_socket, servo[8].openangle);
         LEDpattern1 = bitClear(LEDpattern1,6);
         set_LEDS();
         lcd.print("Closing - seven ");
@@ -388,7 +389,7 @@ void move_points ( int switchNum) {
         break;
 
       case 14:
-        // Button "15" - open Juction eight
+        // Button "15" - open Juction H
         lcd.clear();
         lcd.home();
         Serial.print("Buton 15.");
@@ -400,7 +401,7 @@ void move_points ( int switchNum) {
         break;
 
       case 15:
-        // Button "16" - close Juction eight
+        // Button "16" - close Juction H
         lcd.clear();
         lcd.home();
         Serial.print("Buton 16.");
@@ -412,7 +413,7 @@ void move_points ( int switchNum) {
         break;
 
       case 16:
-        // Button "17" - open Juction nine
+        // Button "17" - open Juction I
         lcd.clear();
         lcd.home();
         Serial.print("Buton 17.");
@@ -424,7 +425,7 @@ void move_points ( int switchNum) {
         break;
 
       case 17:
-        // Button "18" - close Juction nine
+        // Button "18" - close Juction I
         lcd.clear();
         lcd.home();
         Serial.print("Buton 18.");
@@ -436,7 +437,7 @@ void move_points ( int switchNum) {
         break;
 
       case 18:
-        // Button "19" - open Juction ten
+        // Button "19" - open Juction J
         lcd.clear();
         lcd.home();
         Serial.print("Buton 19.");
@@ -448,7 +449,7 @@ void move_points ( int switchNum) {
         break;
 
       case 19:
-        // Button "20" - close Juction ten
+        // Button "20" - close Juction J
         lcd.clear();
         lcd.home();
         Serial.print("Buton 20.");
