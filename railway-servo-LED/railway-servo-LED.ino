@@ -154,7 +154,7 @@ void setup()
 
     servo[6].pwmcard = pwm1;
     servo[6].pwmcard_socket = 8;
-    servo[6].openangle = 110;
+    servo[6].openangle = 120;
     servo[6].closeangle = 70;
 
     servo[7].pwmcard = pwm1;
@@ -165,7 +165,7 @@ void setup()
     servo[8].pwmcard = pwm1;
     servo[8].pwmcard_socket = 4;
     servo[8].openangle = 70;
-    servo[8]closeangle = 110;
+    servo[8].closeangle = 110;
 
     servo[9].pwmcard = pwm1;
     servo[9].pwmcard_socket = 3;
@@ -250,7 +250,7 @@ void move_points ( int switchNum) {
         move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,1);
         set_LEDS();
-        lcd.print("Closing - two");
+        lcd.print("Closing - B");
         delay(500);
         break;
 
@@ -262,7 +262,7 @@ void move_points ( int switchNum) {
         move_servo (servo[2].pwmcard, servo[2].pwmcard_socket, servo[2].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[1];
         set_LEDS();
-        lcd.print("Opening - two");
+        lcd.print("Opening - B");
         delay(500);
         break;
 
@@ -275,7 +275,7 @@ void move_points ( int switchNum) {
         move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,2);
         set_LEDS();
-        lcd.print("Closing - three ");
+        lcd.print("Closing - C ");
         delay(500);
         break;
 
@@ -288,7 +288,7 @@ void move_points ( int switchNum) {
         move_servo (servo[4].pwmcard, servo[4].pwmcard_socket, servo[4].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[2];
         set_LEDS();
-        lcd.print("Opening - three");
+        lcd.print("Opening - C");
         delay(500);
         break;
 
@@ -300,7 +300,7 @@ void move_points ( int switchNum) {
         move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,3);
         set_LEDS();
-        lcd.print("Closing - four ");
+        lcd.print("Closing - D ");
         delay(500);
         break;
 
@@ -312,7 +312,7 @@ void move_points ( int switchNum) {
         move_servo (servo[5].pwmcard, servo[5].pwmcard_socket, servo[5].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[3];
         set_LEDS();
-        lcd.print("Opening - four");
+        lcd.print("Opening - D");
         delay(500);
         break;
 
@@ -324,7 +324,7 @@ void move_points ( int switchNum) {
         move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].closeangle);
         LEDpattern1 = bitClear(LEDpattern1,4);
         set_LEDS();
-        lcd.print("Closing - five");
+        lcd.print("Closing - E");
         delay(500);
         break;
 
@@ -336,7 +336,7 @@ void move_points ( int switchNum) {
         move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[4];
         set_LEDS();
-        lcd.print("Opening - five ");
+        lcd.print("Opening - E ");
         delay(500);
         break;
 
