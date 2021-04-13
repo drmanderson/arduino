@@ -129,13 +129,13 @@ void setup()
 
     servo[1].pwmcard = pwm;
     servo[1].pwmcard_socket = 1;
-    servo[1].openangle = 110;
-    servo[1].closeangle = 70;
+    servo[1].openangle = 130;
+    servo[1].closeangle = 60;
 
     servo[2].pwmcard = pwm;
     servo[2].pwmcard_socket = 2;
-    servo[2].openangle = 110;
-    servo[2].closeangle = 70;
+    servo[2].openangle = 145;
+    servo[2].closeangle = 50;
 
     servo[3].pwmcard = pwm1;
     servo[3].pwmcard_socket = 1;
@@ -181,6 +181,11 @@ void setup()
     servo[11].pwmcard_socket = 5;
     servo[11].openangle = 70;
     servo[11].closeangle = 110;
+
+    servo[12].pwmcard = pwm1;
+    servo[12].pwmcard_socket = 10;
+    servo[12].openangle = 70;
+    servo[12].closeangle = 110;
 
 
 
@@ -322,6 +327,10 @@ void move_points ( int switchNum) {
         lcd.home();
         Serial.print("Button 9.");
         move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].closeangle);
+        move_servo (servo[12].pwmcard, servo[12].pwmcard_socket, servo[12].closeangle) 
+        
+        ;
+        
         LEDpattern1 = bitClear(LEDpattern1,4);
         set_LEDS();
         lcd.print("Closing - E");
@@ -334,6 +343,7 @@ void move_points ( int switchNum) {
         lcd.home();
         Serial.print("Button 10.");
         move_servo (servo[6].pwmcard, servo[6].pwmcard_socket, servo[6].openangle);
+        move_servo (servo[12].pwmcard, servo[12].pwmcard_socket, servo[12].openangle);
         LEDpattern1 = LEDpattern1 | LEDArray[4];
         set_LEDS();
         lcd.print("Opening - E ");
