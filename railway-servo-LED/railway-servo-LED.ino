@@ -11,7 +11,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
 
 // Lets put our defines here.
-#define NUMSERVOS  12 // Enter the number of servos being controlled
+#define NUMSERVOS  14 // Enter the number of servos being controlled
 #define SERVOMIN  125 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  575 // this is the 'maximum' pulse length count (out of 4096)
 #define BYTES_VAL_T unsigned long
@@ -186,6 +186,11 @@ void setup()
     servo[12].pwmcard_socket = 10;
     servo[12].openangle = 70;
     servo[12].closeangle = 110;
+
+    servo[13].pwmcard = pwm1;
+    servo[13].pwmcard_socket = 11;
+    servo[13].openangle = 70;
+    servo[13].closeangle = 120;
 
 
 
@@ -470,29 +475,29 @@ void move_points ( int switchNum) {
         delay(500);
         break;      
 
-      // case 20:
-      //   // Button "21" - open Juction eleven
-      //   lcd.clear();
-      //   lcd.home();
-      //   Serial.print("Buton 21.");
-      //   move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].openangle);
-      //   LEDpattern2 = LEDpattern2 | LEDArray[2];
-      //   set_LEDS();
-      //   lcd.print("Opening - eleven");
-      //   delay(500);
-      //   break;
+       case 20:
+         // Button "21" - open Juction eleven
+         lcd.clear();
+         lcd.home();
+         Serial.print("Buton 21.");
+         move_servo (servo[13].pwmcard, servo[13].pwmcard_socket, servo[13].openangle);
+         LEDpattern2 = LEDpattern2 | LEDArray[2];
+         set_LEDS();
+         lcd.print("Opening - eleven");
+         delay(500);
+         break;
 
-      // case 21:
-      //   // Button "22" - close Juction eleven
-      //   lcd.clear();
-      //   lcd.home();
-      //   Serial.print("Buton 22.");
-      //   move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].closeangle);
-      //   LEDpattern2 = bitClear(LEDpattern2,2);
-      //   set_LEDS();
-      //   lcd.print("Closing - eleven ");
-      //   delay(500);
-      //   break;      
+       case 21:
+         // Button "22" - close Juction eleven
+         lcd.clear();
+         lcd.home();
+         Serial.print("Buton 22.");
+         move_servo (servo[13].pwmcard, servo[13].pwmcard_socket, servo[13].closeangle);
+         LEDpattern2 = bitClear(LEDpattern2,2);
+         set_LEDS();
+         lcd.print("Closing - eleven ");
+         delay(500);
+         break;      
 
       // case 22:
       //   // Button "23" - open Juction twelve
