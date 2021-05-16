@@ -140,12 +140,12 @@ void setup()
     servo[3].pwmcard = pwm1;
     servo[3].pwmcard_socket = 1;
     servo[3].openangle = 70;
-    servo[3].closeangle = 125;
+    servo[3].closeangle = 135;
 
     servo[4].pwmcard = pwm1;
     servo[4].pwmcard_socket = 2;
     servo[4].openangle = 70;
-    servo[4].closeangle = 140;
+    servo[4].closeangle = 145;
 
     servo[5].pwmcard = pwm1;
     servo[5].pwmcard_socket = 7;
