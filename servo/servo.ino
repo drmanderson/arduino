@@ -69,7 +69,7 @@ void loop () {
     if (buttonBState == HIGH)  {
       Serial.println("Button B pressed");
       Serial.println("Moving to 170 degrees :");
-      move_servo (pwm2, 0, 10); 
+      move_servo (pwm2, 0, 170); 
       lastDebounceTimeB = millis();
     }
   } // Close if(B time buffer)
@@ -79,7 +79,7 @@ void loop () {
     if (buttonCState == HIGH) {
       Serial.println("Button C pressed");
       Serial.println("Moving to 90 degrees :");
-      move_servo (pwm2, 0, 10); 
+      move_servo (pwm2, 0, 90); 
       lastDebounceTimeC = millis();
     }
   } // Close if(C time buffer)
