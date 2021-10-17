@@ -49,7 +49,7 @@ void move_servo (Adafruit_PWMServoDriver pwmcard, int srv,int ang)  {
 }
 
 void loop () {
-
+  // Get state of buttons
   buttonAState = digitalRead(buttonApin);
   buttonBState = digitalRead(buttonBpin);
   buttonCState = digitalRead(buttonCpin);
