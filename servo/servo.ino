@@ -1,4 +1,6 @@
+#include <Arduino.h>
 #include <Adafruit_PWMServoDriver.h>
+
 
 Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42);
 #define SERVOMIN  125 // this is the 'minimum' pulse length count (out of 4096)
@@ -15,7 +17,7 @@ long lastDebounceTimeA = 0;  // the last time the output pin was toggled
 long lastDebounceTimeB = 0;  // the last time the output pin was toggled
 long lastDebounceTimeC = 0;  // the last time the output pin was toggled
 
-long debounceDelay = 50;    // the debounce time; increase if the output flickers
+long debounceDelay = 300;    // the debounce time; increase if the output flickers
 
 int servoClosed = -1;
 int servoOpen = -1;
@@ -49,38 +51,35 @@ void move_servo (Adafruit_PWMServoDriver pwmcard, int srv,int ang)  {
 void loop () {
 
   buttonAState = digitalRead(buttonApin);
-  buttonAState = digitalRead(buttonApin);
-  buttonAState = digitalRead(buttonApin);
+  buttonBState = digitalRead(buttonBpin);
+  buttonCState = digitalRead(buttonCpin);
 
   if ( (millis() - lastDebounceTimeA) > debounceDelay) {
     // If the buttonA has been pressed lets move the servo
-    if ( (buttonAState == LOW) && (servoClosed < 0 ) ) {
+    if  (buttonAState == HIGH)  {
       Serial.println("Button A pressed");
       Serial.println("Moving to 10 degrees :");
       move_servo (pwm2, 0, 10); 
-      servoClosed = -servoClosed;
-      lastDebounceTimeA = millis;
+      lastDebounceTimeA = millis();
     }
   } // Close if(A time buffer)
 
   if ( (millis() - lastDebounceTimeB) > debounceDelay) {
     // If the buttonB has been pressed lets move the servo
-    if ( (buttonBState == LOW) && (servoOpen < 0 ) ) {
+    if (buttonBState == HIGH)  {
       Serial.println("Button B pressed");
       Serial.println("Moving to 170 degrees :");
       move_servo (pwm2, 0, 10); 
-      servoOpen = -servoOpen;
       lastDebounceTimeB = millis();
     }
   } // Close if(B time buffer)
   
   if ( (millis() - lastDebounceTimeC) > debounceDelay) {
     // If the buttonC has been pressed lets move the servo
-    if ( (buttonCState == LOW) && (servo90 < 0 ) ) {
+    if (buttonCState == HIGH) {
       Serial.println("Button C pressed");
       Serial.println("Moving to 90 degrees :");
       move_servo (pwm2, 0, 10); 
-      servo90 = -servo90;
       lastDebounceTimeC = millis();
     }
   } // Close if(C time buffer)
