@@ -7,7 +7,7 @@ Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42);
 void setup () {
   // Setup Serial Monitor
   Serial.begin(9600);
-  Serial.println("Starting");
+  Serial.println("Starting servo.ino");
   pwm2.begin();
   pwm2.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 
