@@ -11,11 +11,11 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
 
 // Lets put our defines here.
-#define NUMSERVOS  14 // Enter the number of servos being controlled
+#define NUMSERVOS  16 // Enter the number of servos being controlled
 #define SERVOMIN  125 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  575 // this is the 'maximum' pulse length count (out of 4096)
 #define BYTES_VAL_T unsigned long
-#define NUMBER_OF_CHIPS 3
+#define NUMBER_OF_CHIPS 4
 #define DATA_WIDTH NUMBER_OF_CHIPS * 8
 
 
@@ -89,6 +89,7 @@ void setup()
   lcd.clear();
   // Setup Serial Monitor
   Serial.begin(9600);
+  Serial.println("railway-servo-LED....");
   Serial.println("Setting up ....");
 
   // Setup 74HC165 Serial connections
@@ -191,6 +192,16 @@ void setup()
     servo[13].pwmcard_socket = 11;
     servo[13].openangle = 70;
     servo[13].closeangle = 120;
+
+    servo[14].pwmcard = pwm1;
+    servo[14].pwmcard_socket = 12;
+    servo[14].openangle = 60;
+    servo[14].closeangle = 140;
+    
+    servo[15].pwmcard = pwm1;
+    servo[15].pwmcard_socket = 13;
+    servo[15].openangle = 70;
+    servo[15].closeangle = 140;
 
 
 
@@ -499,29 +510,54 @@ void move_points ( int switchNum) {
          delay(500);
          break;      
 
-      // case 22:
-      //   // Button "23" - open Juction twelve
-      //   lcd.clear();
-      //   lcd.home();
-      //   Serial.print("Buton 21.");
-      //   move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].openangle);
-      //   LEDpattern2 = LEDpattern2 | LEDArray[3];
-      //   set_LEDS();
-      //   lcd.print("Opening - twelve");
-      //   delay(500);
-      //   break;
+      case 22:
+         // Button "23" - open Juction twelve
+         lcd.clear();
+         lcd.home();
+         Serial.print("Buton 23.");
+         move_servo (servo[14].pwmcard, servo[14].pwmcard_socket, servo[14].openangle);
+         LEDpattern2 = LEDpattern2 | LEDArray[3];
+         set_LEDS();
+         lcd.print("Opening - twelve");
+         delay(500);
+         break;
 
-      // case 23:
-      //   // Button 24 - close Juction twelve
-      //   lcd.clear();
-      //   lcd.home();
-      //   Serial.print("Buton 24.");
-      //   move_servo (servo[9].pwmcard, servo[9].pwmcard_socket, servo[9].closeangle);
-      //   LEDpattern2 = bitClear(LEDpattern2,3);
-      //   set_LEDS();
-      //   lcd.print("Closing - twelve");
-      //   delay(500);
-      //   break;   
+      case 23:
+         // Button 24 - close Juction twelve
+         lcd.clear();
+         lcd.home();
+         Serial.print("Buton 24.");
+         move_servo (servo[14].pwmcard, servo[14].pwmcard_socket, servo[14].closeangle);
+         LEDpattern2 = bitClear(LEDpattern2,3);
+         set_LEDS();
+         lcd.print("Closing - twelve");
+         delay(500);
+         break;   
+
+      case 24:
+        // Button 25 - close Juncton 13
+        lcd.clear();
+        lcd.home();
+        Serial.print("Button 25.");
+        move_servo (servo[15].pwmcard, servo[15].pwmcard_socket, servo[15].openangle);
+        LEDpattern2 = bitClear(LEDpattern2,3);
+        set_LEDS();
+        lcd.print("Closing - thirteen");
+        delay(500);
+        break;         
+
+      case 25:
+        // Button 26 - close Juncton 13
+        lcd.clear();
+        lcd.home();
+        Serial.print("Button 26.");
+        move_servo (servo[15].pwmcard, servo[15].pwmcard_socket, servo[15].closeangle);
+        LEDpattern2 = bitClear(LEDpattern2,3);
+        set_LEDS();
+        lcd.print("Opening - thirteen");
+        delay(500);
+        break;  
+
 
       default:
          // default - it's broken
