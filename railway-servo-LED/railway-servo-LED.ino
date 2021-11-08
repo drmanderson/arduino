@@ -9,6 +9,7 @@ LiquidCrystal_I2C lcd(0x27,20,4);
 // Setup pwm objects and their addresses
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
+Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42)
 
 // Lets put our defines here.
 #define NUMSERVOS  16 // Enter the number of servos being controlled
@@ -203,6 +204,10 @@ void setup()
     servo[15].openangle = 70;
     servo[15].closeangle = 140;
 
+    servo[16].pwmcard = pwm2;
+    servo[16].pwmcard_socket = 0;
+    servo[16].close_angle = 70;
+    servo[16].open_angle = 120;
 
 
 // Start board in safe positions with all junctions "closed"
