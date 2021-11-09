@@ -9,10 +9,10 @@ LiquidCrystal_I2C lcd(0x27,20,4);
 // Setup pwm objects and their addresses
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
-Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42)
+Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42);
 
 // Lets put our defines here.
-#define NUMSERVOS  16 // Enter the number of servos being controlled
+#define NUMSERVOS  17 // Enter the number of servos being controlled
 #define SERVOMIN  125 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  575 // this is the 'maximum' pulse length count (out of 4096)
 #define BYTES_VAL_T unsigned long
@@ -206,8 +206,8 @@ void setup()
 
     servo[16].pwmcard = pwm2;
     servo[16].pwmcard_socket = 0;
-    servo[16].close_angle = 70;
-    servo[16].open_angle = 120;
+    servo[16].closeangle = 70;
+    servo[16].openangle = 120;
 
 
 // Start board in safe positions with all junctions "closed"
@@ -563,7 +563,29 @@ void move_points ( int switchNum) {
         delay(500);
         break;  
 
+      case 26:
+        // Button 27 - close Juncton 14
+        lcd.clear();
+        lcd.home();
+        Serial.print("Button 27.");
+        move_servo (servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].openangle);
+        LEDpattern2 = bitClear(LEDpattern2,3);
+        set_LEDS();
+        lcd.print("Closing - fourteen");
+        delay(500);
+        break;         
 
+      case 27:
+        // Button 28 - close Juncton 14
+        lcd.clear();
+        lcd.home();
+        Serial.print("Button 28.");
+        move_servo (servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].closeangle);
+        LEDpattern2 = bitClear(LEDpattern2,3);
+        set_LEDS();
+        lcd.print("Opening - fourteen");
+        delay(500);
+        break;  
       default:
          // default - it's broken
         lcd.clear();
