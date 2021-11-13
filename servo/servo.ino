@@ -2,6 +2,8 @@
 #include <Adafruit_PWMServoDriver.h>
 
 
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
+Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
 Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42);
 #define SERVOMIN  125 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  575 // this is the 'maximum' pulse length count (out of 4096)
@@ -12,7 +14,9 @@ const int buttonCpin = 9; // Servo 90 degs
 int buttonAState = LOW; 
 int buttonBState = LOW; 
 int buttonCState = LOW; 
-int servo = 15;
+int pwm2_servo = 15;
+int pwm_servo = 0;
+int pwm1_servo = 4;
 
 long lastDebounceTimeA = 0;  // the last time the output pin was toggled
 long lastDebounceTimeB = 0;  // the last time the output pin was toggled
@@ -60,7 +64,9 @@ void loop () {
     if  (buttonAState == HIGH)  {
       Serial.println("Button A pressed");
       Serial.println("Moving to 10 degrees :");
-      move_servo (pwm2, servo, 10); 
+      move_servo (pwm, pwm_servo, 50)
+      move_servo (pwm1, pwm1_servo, 50)
+      move_servo (pwm2, pwm2_servo, 50); 
       lastDebounceTimeA = millis();
     }
   } // Close if(A time buffer)
@@ -70,7 +76,9 @@ void loop () {
     if (buttonBState == HIGH)  {
       Serial.println("Button B pressed");
       Serial.println("Moving to 170 degrees :");
-      move_servo (pwm2, servo, 170); 
+      move_servo (pwm2, pwm2_servo, 120);
+      move_servo (pwm1, pwm1_servo, 120);
+      move_servo (pwm, pwm_servo, 120);
       lastDebounceTimeB = millis();
     }
   } // Close if(B time buffer)
@@ -80,7 +88,9 @@ void loop () {
     if (buttonCState == HIGH) {
       Serial.println("Button C pressed");
       Serial.println("Moving to 90 degrees :");
-      move_servo (pwm2, servo, 90); 
+      move_servo (pwm2, pwm2_servo, 90);
+      move_servo (pwm1, pwm1_servo, 90);
+      move_servo (pwm, pwm_servo, 90); 
       lastDebounceTimeC = millis();
     }
   } // Close if(C time buffer)

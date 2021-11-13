@@ -1,0 +1,20 @@
+{
+    "folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "servo",
+			"path": "..\\servo\\servo"
+		},
+		{
+			"name": "211017-143517-nanoatmega328new",
+			"path": "..\\..\\PlatformIO\\Projects\\211017-143517-nanoatmega328new"
+		},
+		{
+			"name": "211017-143920-nanoatmega328new",
+			"path": "..\\..\\PlatformIO\\Projects\\211017-143920-nanoatmega328new"
+		}
+	],
+    "settings": {}
+}
