@@ -12,6 +12,7 @@ const int buttonCpin = 9; // Servo 90 degs
 int buttonAState = LOW; 
 int buttonBState = LOW; 
 int buttonCState = LOW; 
+int servo = 15;
 
 long lastDebounceTimeA = 0;  // the last time the output pin was toggled
 long lastDebounceTimeB = 0;  // the last time the output pin was toggled
@@ -59,7 +60,7 @@ void loop () {
     if  (buttonAState == HIGH)  {
       Serial.println("Button A pressed");
       Serial.println("Moving to 10 degrees :");
-      move_servo (pwm2, 0, 10); 
+      move_servo (pwm2, servo, 10); 
       lastDebounceTimeA = millis();
     }
   } // Close if(A time buffer)
@@ -69,7 +70,7 @@ void loop () {
     if (buttonBState == HIGH)  {
       Serial.println("Button B pressed");
       Serial.println("Moving to 170 degrees :");
-      move_servo (pwm2, 0, 170); 
+      move_servo (pwm2, servo, 170); 
       lastDebounceTimeB = millis();
     }
   } // Close if(B time buffer)
@@ -79,7 +80,7 @@ void loop () {
     if (buttonCState == HIGH) {
       Serial.println("Button C pressed");
       Serial.println("Moving to 90 degrees :");
-      move_servo (pwm2, 0, 90); 
+      move_servo (pwm2, servo, 90); 
       lastDebounceTimeC = millis();
     }
   } // Close if(C time buffer)
