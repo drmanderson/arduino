@@ -121,6 +121,8 @@ void setup()
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
   pwm1.begin();
   pwm1.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+  pwm2.begin();
+  pwm2.setPWMFreq(60);  // Analog servos run at ~60 Hz updates  
 
   // Setup NUMSERVOS servos
   // Remember to update ths number when new servos are added.
@@ -206,8 +208,8 @@ void setup()
 
     servo[16].pwmcard = pwm2;
     servo[16].pwmcard_socket = 15;
-    servo[16].closeangle = 70;
-    servo[16].openangle = 120;
+    servo[16].closeangle = 40;
+    servo[16].openangle = 110;
 
 
 // Start board in safe positions with all junctions "closed"
