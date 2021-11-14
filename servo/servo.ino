@@ -34,7 +34,10 @@ void setup () {
   Serial.println("Starting servo.ino");
   pwm2.begin();
   pwm2.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
-  pinMode(buttonApin, INPUT_PULLUP);
+  pwm.begin();
+  pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates  pwm2.begin();
+  pwm1.begin();
+  pwm1.setPWMFreq(60);  // Analog servos run at ~60 Hz updates  pinMode(buttonApin, INPUT_PULLUP);
   pinMode(buttonBpin, INPUT_PULLUP);
   pinMode(buttonCpin, INPUT_PULLUP);  
 
@@ -64,8 +67,8 @@ void loop () {
     if  (buttonAState == HIGH)  {
       Serial.println("Button A pressed");
       Serial.println("Moving to 10 degrees :");
-      move_servo (pwm, pwm_servo, 50)
-      move_servo (pwm1, pwm1_servo, 50)
+      move_servo (pwm, pwm_servo, 50);
+      move_servo (pwm1, pwm1_servo, 50);
       move_servo (pwm2, pwm2_servo, 50); 
       lastDebounceTimeA = millis();
     }
