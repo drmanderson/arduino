@@ -35,6 +35,18 @@ struct ServoData {
 
 ServoData servo[NUMSERVOS];
 
+int angleToPulse(int ang){
+   int pulse = map(ang,0, 180, SERVOMIN,SERVOMAX);// map angle of 0 to 180 to Servo min and Servo max
+   return pulse;
+}
+
+void move_servo (Adafruit_PWMServoDriver pwmcard, int srv,int ang)  {
+  pwmcard.setPWM(srv, 0, angleToPulse(ang));
+  Serial.print("moving servo ");
+  Serial.print(srv);
+  Serial.print(" to angle ");
+  Serial.println(ang);
+}
 
 
 void setup () {
@@ -68,18 +80,6 @@ void setup () {
 
 }
 
-int angleToPulse(int ang){
-   int pulse = map(ang,0, 180, SERVOMIN,SERVOMAX);// map angle of 0 to 180 to Servo min and Servo max
-   return pulse;
-}
-
-void move_servo (Adafruit_PWMServoDriver pwmcard, int srv,int ang)  {
-  pwmcard.setPWM(srv, 0, angleToPulse(ang));
-  Serial.print("moving servo ");
-  Serial.print(srv);
-  Serial.print(" to angle ");
-  Serial.println(ang);
-}
 
 void loop () {
   // Get state of buttons
