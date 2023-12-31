@@ -128,13 +128,13 @@ void setup()
   // Remember to update ths number when new servos are added.
     servo[0].pwmcard = pwm;
     servo[0].pwmcard_socket = 0;
-    servo[0].openangle = 100;
-    servo[0].closeangle = 70;
+    servo[0].openangle = 140;
+    servo[0].closeangle = 65;
 
     servo[1].pwmcard = pwm;
     servo[1].pwmcard_socket = 1;
-    servo[1].openangle = 100;
-    servo[1].closeangle = 70;
+    servo[1].openangle = 110;
+    servo[1].closeangle = 60;
 
     servo[2].pwmcard = pwm;
     servo[2].pwmcard_socket = 2;
