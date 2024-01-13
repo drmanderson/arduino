@@ -140,6 +140,11 @@ void setup()
     servo[2].pwmcard_socket = 2;
     servo[2].openangle = 120;
     servo[2].closeangle = 60;
+
+    servo[3].pwmcard = pwm;
+    servo[3].pwmcard_socket = 3;
+    servo[3].openangle = 125;
+    servo[3].closeangle = 55;
     
     servo[16].pwmcard = pwm1;
     servo[16].pwmcard_socket = 0;
@@ -505,6 +510,29 @@ void move_points ( int switchNum) {
          delay(500);
          break;      
 
+       case 22:
+         // Button "21" - open Juction twelve
+         lcd.clear();
+         lcd.home();
+         Serial.print("Buton 22.");
+         move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].openangle);
+         LEDpattern2 = LEDpattern2 | LEDArray[2];
+         set_LEDS();
+         lcd.print("Opening - twelve");
+         delay(500);
+         break;
+
+       case 23:
+         // Button "23" - close Juction twelve
+         lcd.clear();
+         lcd.home();
+         Serial.print("Buton 23.");
+         move_servo (servo[3].pwmcard, servo[3].pwmcard_socket, servo[3].closeangle);
+         LEDpattern2 = bitClear(LEDpattern2,2);
+         set_LEDS();
+         lcd.print("Closing - twelve ");
+         delay(500);
+         break;  
       default:
          // default - it's broken
         lcd.clear();
