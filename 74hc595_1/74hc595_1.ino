@@ -17,15 +17,15 @@ const int clockPin = 9;
 const int dataPin = 10;
 
 // Patterns for characters 0,1,2,3,4,5,6,7,8,9,A,b,C,d,E,F
-int datArray[8] = {B00000001, 
-                    B00000010, 
-                    B00000100, 
-                    B00001000, 
-                    B00010000, 
-                    B00100000,
-                    B01000000,
-                    B10000000
- };
+int datArray[8] = {B00000001,
+                   B00000010,
+                   B00000100,
+                   B00001000,
+                   B00010000,
+                   B00100000,
+                   B01000000,
+                   B10000000
+                  };
 
 void setup ()
 {
