@@ -1,6 +1,6 @@
-int latchPin = 12; // Pin connected to ST_CP of 74HC595, Pin12 
-int clockPin = 13; // Pin connected to SH_CP of 74HC595, Pin11 
-int dataPin = 11; // Pin connected to DS of 74HC595, Pin14 
+int latchPin = 8; // Pin connected to ST_CP of 74HC595, Pin12 
+int clockPin = 9; // Pin connected to SH_CP of 74HC595, Pin11 
+int dataPin = 10; // Pin connected to DS of 74HC595, Pin14 
 /* uncomment one of the following lines that describes your display
  *  and comment out the line that does not describe your display */
 //const char common = 'a';    // common anode

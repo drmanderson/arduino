@@ -1,4 +1,4 @@
-/*
+ /*
   74HC595 Shift Register with 7-segment LED display
   74hc595-7segdisplay.ino
   Count in hex from 0-F and display on 7-segment Common Cathode LED display
@@ -27,18 +27,28 @@ int datArray[8] = {B00000001,
                    B10000000
                   };
 
+
 void setup ()
 {
   // Setup pins as Outputs
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
+  Serial.begin(9600);    
+  Serial.println("74HC595 Demo 2xchips for 16 bit register.");
 }
 void loop()
 {
   // Count from 0 to 15
-  for (int num = 0; num < 8; num++)
+  for (int num = 0; num < 16; num++)
   {
+      Serial.print(num);
+      Serial.print(", ");
+      Serial.print(datArray[num],BIN);
+      Serial.print(", 0x");
+      Serial.print(datArray[num],HEX);
+      Serial.print(", ");
+      Serial.println(datArray[num]);
     // ST_CP LOW to keep LEDs from changing while reading serial data
     digitalWrite(latchPin, LOW);
 
@@ -48,6 +58,6 @@ void loop()
     // ST_CP HIGH change LEDs
     digitalWrite(latchPin, HIGH);
 
-    delay(1000);
+    delay(500);
   }
 }

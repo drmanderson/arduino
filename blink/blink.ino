@@ -28,6 +28,7 @@ int ledPin = 5;
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(ledPin, OUTPUT);
+  s
 }
 
 // the loop function runs over and over again forever

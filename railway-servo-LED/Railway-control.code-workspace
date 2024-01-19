@@ -2,6 +2,10 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"name": "240101-123432-nanoatmega328new",
+			"path": "../../PlatformIO/Projects/240101-123432-nanoatmega328new"
 		}
 	],
 	"settings": {}
