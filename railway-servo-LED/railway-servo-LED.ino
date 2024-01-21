@@ -144,7 +144,7 @@ void setup()
   // Remember to update ths number when new servos are added.
     servo[0].pwmcard = pwm;
     servo[0].pwmcard_socket = 0;
-    servo[0].openangle = 140;
+    servo[0].openangle = 145;
     servo[0].closeangle = 65;
 
     servo[1].pwmcard = pwm;
@@ -223,21 +223,22 @@ void setup()
     servo[27].closeangle= 60; 
   
 // Start board in safe positions with all junctions "closed"
- for (int i = 0; i <= NUMSERVOS-1; i++) {
-   Serial.print("Closing :");
-   Serial.println(i);
-   move_servo (servo[i].pwmcard, servo[i].pwmcard_socket, servo[i].closeangle);
-   delay(500);
- }
+// for (int i = 0; i <= NUMSERVOS-1; i++) {
+//   Serial.print("Closing :");
+//   Serial.println(i);
+//   move_servo (servo[i].pwmcard, servo[i].pwmcard_socket, servo[i].closeangle);
+//   delay(2000);
+// }
+  Serial.println ("Flashing Leds");
   // Flash all the LEDS
   LEDpattern1 = B11111111;
   LEDpattern2 = B11111111;
   set_LEDS ();
-  delay(1000);
+  delay(3000);
   LEDpattern1 = B00000000;
   LEDpattern2 = B00000000;
   set_LEDS ();
-	
+	delay (3000);
   lcd.print("Setup done.");
   Serial.println("Setup done.");
 }
@@ -245,8 +246,8 @@ void setup()
 void set_LEDS () {
   // Set the LEDS that are on / off
   digitalWrite(latchPinOut, LOW);
-  shiftOut (dataPinOut, clockPinOut, MSBFIRST, LEDpattern1 );
-  shiftOut (dataPinOut, clockPinOut, MSBFIRST, LEDpattern2 );
+  shiftOut (dataPinOut, clockPinOut, LSBFIRST, LEDpattern1 );
+  shiftOut (dataPinOut, clockPinOut, LSBFIRST, (LEDpattern2 >>8) );
   digitalWrite (latchPinOut, HIGH);
 }
 
