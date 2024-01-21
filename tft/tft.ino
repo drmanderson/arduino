@@ -12,36 +12,26 @@
 #include <Adafruit_GFX.h>    // Adafruit Grafik-Bibliothek
 #include <Adafruit_ST7735.h> // Adafruit ST7735-Bibliothek
 #include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
+
 
 
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_PIN_CS, TFT_PIN_DC, TFT_PIN_RST);  // Display-Bibliothek Setup
-Adafruit_BME280 bme; // use I2C interface
 #define SEALEVELPRESSURE_HPA (1013.25)
 
 void setup(void) {
   Serial.begin(115200);
-  Serial.println(F("BMP280 test"));
+  Serial.println(F("TFT test"));
   tft.initR(INITR_BLACKTAB);   // ST7735-Chip initialisieren
 
-  bool status;
-  // default settings
-  // (you can also pass in a Wire library object like &Wire2)
-  status = bme.begin(0x76);  
-  if (!status) {
-    Serial.println("Could not find a valid BME280 sensor, check wiring!");
-    while (1);
-  }
 
   tft.fillScreen(ST7735_BLACK);
 }
 
 void loop() {
 
-  int Temp = bme.readTemperature();
-  int Humidity = bme.readHumidity();
-  int Hpa = bme.readPressure() /100.0F;
+  int Temp = 24;
+  int Humidity = 60;
+  int Hpa = 1023;
 
   tft.setTextSize(1);
   tft.setTextWrap(true); 

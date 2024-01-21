@@ -22,13 +22,13 @@
   http://www.arduino.cc/en/Tutorial/Blink
 */
 
-int ledPin = 5;
+int ledPin = 13;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(ledPin, OUTPUT);
-  s
+
 }
 
 // the loop function runs over and over again forever

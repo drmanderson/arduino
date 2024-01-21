@@ -36,13 +36,29 @@ const int clockEnablePin  = 4;  // Connects to Clock Enable pin the 165 (15)
 const int dataPin         = 5;  // Connects to the Q7 pin the 165 (9)
 const int clockPin        = 6;  // Connects to the Clock pin the 165 (2)
 const int ploadPin        = 7;  // Connects to Parallel load pin the 165 (1)
+
 const int latchPinOut     = 9;  // Connects to the RCLK pin of the 595 (12)  ST_CP
 const int clockPinOut     = 10;  // Connects to the SRCLK ping of the 595 (11) SH_CP
 const int dataPinOut      = 11;  // Connects to the SER pin of the 595 (14) DS
 
-int LEDpattern1;       // LED Pattern to send to the first 74hc595
-int LEDpattern2;       // LED Pattern to send to the second 74hc595
-int LEDArray[8] = {B00000001, B00000010, B00000100, B00001000, B00010000, B00100000,B01000000,B10000000};
+uint16_t LEDpattern1;       // LED Pattern to send to the first 74hc595
+uint16_t LEDpattern2;       // LED Pattern to send to the second 74hc595
+uint16_t LEDArray[8] = {0b0000000000000001,
+                   0b0000000000000010,
+                   0b0000000000000100,
+                   0b0000000000001000,
+                   0b0000000000010000,
+                   0b0000000000100000,
+                   0b0000000001000000,
+                   0b0000000010000000};
+uint16_t LEDArray2[8] = {0b0000000100000000,
+                   0b0000001000000000,
+                   0b0000010000000000,
+                   0b0000100000000000,
+                   0b0001000000000000,
+                   0b0010000000000000,
+                   0b0100000000000000,
+                   0b1000000000000000};
 
 // Setup initial values
 BYTES_VAL_T pinValues = 0;                    // new values for  74HC165 chips
@@ -206,13 +222,13 @@ void setup()
     servo[27].openangle = 120;
     servo[27].closeangle= 60; 
   
-//// Start board in safe positions with all junctions "closed"
-//  for (int i = 0; i <= NUMSERVOS-1; i++) {
-//    Serial.print("Closing :");
-//    Serial.println(i);
-//    move_servo (servo[i].pwmcard, servo[i].pwmcard_socket, servo[i].closeangle);
-//    delay(500);
-//  }
+// Start board in safe positions with all junctions "closed"
+ for (int i = 0; i <= NUMSERVOS-1; i++) {
+   Serial.print("Closing :");
+   Serial.println(i);
+   move_servo (servo[i].pwmcard, servo[i].pwmcard_socket, servo[i].closeangle);
+   delay(500);
+ }
   // Flash all the LEDS
   LEDpattern1 = B11111111;
   LEDpattern2 = B11111111;
