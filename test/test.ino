@@ -4,17 +4,39 @@ int latchPinA = 8;
 int clockPinA = 12;
 //Pin connected to DS of 74HC595-RELAY
 int dataPinA = 11;
-//Pin connected to ST_CP of 74HC595-LED
+
+//Connects to the RCLK pin of the 595 (12)  ST_CP
 int latchPinB = 3;
-//Pin connected to SH_CP of 74HC595-LED
+//Connects to the SRCLK ping of the 595 (11) SH_CP
 int clockPinB = 4;
-//Pin connected to DS of 74HC595-LED
+//Connects to the SER pin of the 595 (14) DS
 int dataPinB = 5;
 
 const int list [] = {1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768};
 #include <LiquidCrystal_I2C.h> // Library for LCD
 LiquidCrystal_I2C lcd(0x27, 20, 4); // I2C address 0x27, 20 column and 4 rows
 
+void set_LEDSB (uint16_t LEDpattern1) {
+  // ST_CP LOW to keep LEDs from changing while reading serial data
+  digitalWrite(latchPinB, LOW);
+  // Shift out the bits
+  shiftOut (dataPinB, clockPinB, LSBFIRST, LEDpattern1 );
+  shiftOut (dataPinB, clockPinB, LSBFIRST, (LEDpattern1 >>8) );
+  // ST_CP HIGH change LEDs
+  digitalWrite(latchPinB, HIGH);
+}
+
+void flashLeds (int count, int pause) {
+  for (int num = 1; num <= count; num++)
+  {
+  set_LEDSB(0b0000000000000000);
+  delay (pause);
+  set_LEDSB(0b1111111111111111);
+  delay (pause);
+  set_LEDSB(0b0000000000000000); 
+  delay (pause);
+  }
+}
 
 int datArray[16] = {0b0000000000000001,
                    0b0000000000000010,
@@ -34,6 +56,9 @@ int datArray[16] = {0b0000000000000001,
                    0b1000000000000000
                   };
 
+
+uint16_t LEDPattern = 0b0000000000000000;
+
 void setup() {
   //set pins to output because they are addressed in the main loop
   pinMode(latchPinA, OUTPUT);
@@ -44,7 +69,12 @@ void setup() {
   pinMode(dataPinB, OUTPUT);  
   lcd.init(); // initialize the lcd
   lcd.backlight();
-}
+  Serial.begin(9600);
+  Serial.println("Starting");
+  set_LEDSB (0);
+  LEDPattern = 0b0000000000000000;
+
+  }
 
 void loop1() {
   //count up routine
@@ -89,33 +119,51 @@ void loop1() {
     digitalWrite(latchPinB, HIGH);
     delay(500);  
   } 
-}void loop()
-{
+}
+
+void loop2() {
+  flashLeds (5,100);
   // Count from 0 to 15
   for (int num = 0; num < 16; num++)
   {
-    // ST_CP LOW to keep LEDs from changing while reading serial data
-    digitalWrite(latchPinB, LOW);
-
-    // Shift out the bits
-    shiftOut(dataPinB, clockPinB, LSBFIRST, datArray[num]);
-   shiftOut(dataPinB, clockPinB, LSBFIRST, (datArray[num]>> 8));
-    // ST_CP HIGH change LEDs
-    digitalWrite(latchPinB, HIGH);
-
-    delay(500);
+    Serial.print("Counting up .... ");
+    Serial.println(num);
+    set_LEDSB( datArray[num]);
+    delay(50);
   }
-   for (int num = 16; num > 0; num--)
+   set_LEDSB(0b0000000000000000);
+   delay(50);
+   for (int num = 16; num >= 0; --num)
   {
-    // ST_CP LOW to keep LEDs from changing while reading serial data
-    digitalWrite(latchPinB, LOW);
-
-    // Shift out the bits
-    shiftOut(dataPinB, clockPinB, LSBFIRST, datArray[num]);
-   shiftOut(dataPinB, clockPinB, LSBFIRST, (datArray[num]>> 8));
-    // ST_CP HIGH change LEDs
-    digitalWrite(latchPinB, HIGH);
-
-    delay(500);
+    Serial.print("Counting down .... ");
+    Serial.println(num);
+    set_LEDSB( datArray[num]);
+    delay(50);
   } 
+  set_LEDSB(0b0000000000000000);
+  delay (2000);
+  flashLeds(2,100);
+  Serial.println("and repeat");
+  delay (2000);
+}
+
+void loop () {
+    flashLeds (2,100);
+    delay (2000);
+    // Lets turn on some LEDS and update the array each time.
+    LEDPattern = LEDPattern | datArray[0];
+    set_LEDSB (LEDPattern);
+    delay (2000);
+    LEDPattern = LEDPattern | datArray[5];
+    set_LEDSB (LEDPattern);
+    delay (2000);
+    LEDPattern = LEDPattern | datArray[13];
+    set_LEDSB (LEDPattern);
+    delay (2000);
+    LEDPattern = bitClear(LEDPattern,5);
+    set_LEDSB (LEDPattern);
+    delay (2000);
+    LEDPattern = bitClear(LEDPattern,0);
+    set_LEDSB (LEDPattern);
+    delay (2000);
 }
