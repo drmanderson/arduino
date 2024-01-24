@@ -97,7 +97,7 @@ BYTES_VAL_T read_values() {
 // Function dedlarations
 //
 void move_servo(int srv, bool open, bool off, bool init = false);
-void print_message(String message,  bool lcd = true, bool serial = true);
+void print_message(String message,  bool lcdout = true, bool serialout = true);
 void set_LEDS();
 void move_points(int switchNum);
 
@@ -274,6 +274,7 @@ void set_LEDS() {
   shiftOut(dataPinOut, clockPinOut, LSBFIRST, (LEDpattern1 >> 8));
   digitalWrite(latchPinOut, HIGH);
 }
+
 
 void print_message(String message,bool lcdout=true, bool serialout=true) {
   if (serialout) {
@@ -561,7 +562,7 @@ void move_points(int switchNum) {
 
 void move_servo(int srv, bool open, bool off, bool init = false) {
   int ang = 90;  // 90 is a safe agnle to set to if something is borked
-  uint16_t pulselength = 0;
+  int pulselength = 0;
   if (open) {  // We want to open the point
     ang = servo[srv].openangle;
   } else {  // We want to close the point
@@ -569,32 +570,37 @@ void move_servo(int srv, bool open, bool off, bool init = false) {
   }
   // Are we initialising - init=true
   if (init) {
+    Serial.print(srv);
+    Serial.print(",");
     //currangle is not valid. Close  points and set currangle to closeangle
-    pulselength = map(servo[srv].closeangle, 0, 180, SERVOMIN, SERVOMAX);  // map angle of 0 to 180 to Servo min and Servo max
+    Serial.print(servo[srv].currangle);
+    Serial.print(",");
+    int pulselength = map(servo[srv].closeangle, 0, 180, SERVOMIN, SERVOMAX);  // map angle of 0 to 180 to Servo min and Servo max
+    servo[srv].pwmcard.setPWM(srv, 0, pulselength);
     servo[srv].currangle = servo[srv].closeangle;
+    Serial.print(servo[srv].currangle);
+    Serial.print(",");
+    Serial.println(servo[srv].closeangle);
     if (off) {  // There's no real load on the servo so we can disable it after it's moved. Saves a bit of power and stops it hunting
       servo[srv].pwmcard.setPWM(srv, 0, 4096);
-    }
+      }
   } else {
     // ok - slow servo move.
-    if (servo[srv].currangle == ang) return;
+    Serial.println("Slow move");
+    if (servo[srv].currangle == ang) {
+      Serial.println("currangle is 90");
+      return;
+    }
     else if (ang > servo[srv].currangle) {
-      Serial.print("servo ");
-      Serial.print(srv);
-      Serial.print(" current pos ");
-      Serial.println(servo[srv].currangle);
+      Serial.println("currangle is 90");
       for (int i = servo[srv].currangle; i < ang; i++) {
-        Serial.print("new angle  ");
-        Serial.println(i);
-        uint16_t pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
+        int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
         servo[srv].pwmcard.setPWM(srv, 0, pulselength);
         delay(30);
       }
     } else if (servo[srv].currangle > ang) {
       for (int i = servo[srv].currangle; i > ang; i--) {
-        Serial.print("new angle  ");
-        Serial.println(i);
-        uint16_t pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
+        int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
         servo[srv].pwmcard.setPWM(srv, 0, pulselength);
         delay(30);
       }
