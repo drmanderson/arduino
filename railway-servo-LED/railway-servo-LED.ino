@@ -41,6 +41,8 @@ const int latchPinOut = 9;  // Connects to the RCLK pin of the 595 (12)  ST_CP
 const int clockPinOut = 10; // Connects to the SRCLK ping of the 595 (11) SH_CP
 const int dataPinOut = 11;  // Connects to the SER pin of the 595 (14) DS
 
+const int readyLED = 2;
+
 uint16_t LEDpattern1; // LED Pattern to send to the 74HC595 chips
 uint16_t LEDArray[16] = {0b0000000000000001,
                          0b0000000000000010,
@@ -130,6 +132,9 @@ void setup()
   pinMode(latchPinOut, OUTPUT);
   pinMode(clockPinOut, OUTPUT);
   pinMode(dataPinOut, OUTPUT);
+
+  // Ready LED PIN
+  pinMode(readyLED,OUTPUT);
 
   // initialise the 74HC595 with all LED off 0b0000000000000000
   LEDpattern1 = 0b0000000000000000;
@@ -663,6 +668,8 @@ void move_servo(int srv, bool open, bool off, bool init = false)
 
 void loop()
 {
+  // Light readyLED
+  digitalWrite(readyLED, HIGH);
   // Read all pin values
   pinValues = read_values();
   // Process any changes in the values and call to move_points
@@ -672,6 +679,8 @@ void loop()
     {
       if ((pinValues >> i) & 1)
       {
+        // We're doing something so turn off readyLED
+        digitalWrite(readyLED, LOW);
         move_points(i);
       }
     }
