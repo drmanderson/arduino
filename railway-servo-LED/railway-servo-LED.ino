@@ -1,6 +1,6 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27, 16,2);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // include the PWMServo library
 #include <Adafruit_PWMServoDriver.h>
@@ -10,60 +10,60 @@ Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
 Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42);
 
 // Lets put our defines here.
-#define NUMSERVOS 28  // Enter the number of servos being controlled
-#define SERVOMIN 125  // this is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX 575  // this is the 'maximum' pulse length count (out of 4096)
+#define NUMSERVOS 28 // Enter the number of servos being controlled
+#define SERVOMIN 125 // this is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX 575 // this is the 'maximum' pulse length count (out of 4096)
 #define BYTES_VAL_T unsigned long
 #define NUMBER_OF_CHIPS 4
 #define DATA_WIDTH NUMBER_OF_CHIPS * 8
 
-
 // Setup servo struct that holds pwm card, socket number and open/close angles.
-struct ServoData {
-  Adafruit_PWMServoDriver pwmcard;  // PCA9685 card number
-  byte pwmcard_socket;              // Socket on PCA9685 card
-  byte openangle;                   // User Configurable servo angle for open point
-  byte closeangle;                  // User Configurable servo angle for close point
-  bool relay;                       // Is a relay needed for FROG switching
-  byte currangle;                   // Current angle - used for slow sweep
+struct ServoData
+{
+  Adafruit_PWMServoDriver pwmcard; // PCA9685 card number
+  byte pwmcard_socket;             // Socket on PCA9685 card
+  byte openangle;                  // User Configurable servo angle for open point
+  byte closeangle;                 // User Configurable servo angle for close point
+  bool relay;                      // Is a relay needed for FROG switching
+  byte currangle;                  // Current angle - used for slow sweep
 };
 
-ServoData servo[NUMSERVOS] = { NULL };
-int currangle[NUMSERVOS] = { 0 };
+ServoData servo[NUMSERVOS] = {NULL};
 
-//74HC165 pins
-const int clockEnablePin = 4;  // Connects to Clock Enable pin the 165 (15)
-const int dataPin = 5;         // Connects to the Q7 pin the 165 (9)
-const int clockPin = 6;        // Connects to the Clock pin the 165 (2)
-const int ploadPin = 7;        // Connects to Parallel load pin the 165 (1)
+// 74HC165 pins
+const int clockEnablePin = 4; // Connects to Clock Enable pin the 165 (15)
+const int dataPin = 5;        // Connects to the Q7 pin the 165 (9)
+const int clockPin = 6;       // Connects to the Clock pin the 165 (2)
+const int ploadPin = 7;       // Connects to Parallel load pin the 165 (1)
 
-//74HC595 pins
-const int latchPinOut = 9;   // Connects to the RCLK pin of the 595 (12)  ST_CP
-const int clockPinOut = 10;  // Connects to the SRCLK ping of the 595 (11) SH_CP
-const int dataPinOut = 11;   // Connects to the SER pin of the 595 (14) DS
+// 74HC595 pins
+const int latchPinOut = 9;  // Connects to the RCLK pin of the 595 (12)  ST_CP
+const int clockPinOut = 10; // Connects to the SRCLK ping of the 595 (11) SH_CP
+const int dataPinOut = 11;  // Connects to the SER pin of the 595 (14) DS
 
-uint16_t LEDpattern1;  // LED Pattern to send to the 74HC595 chips
-uint16_t LEDArray[16] = { 0b0000000000000001,
-                          0b0000000000000010,
-                          0b0000000000000100,
-                          0b0000000000001000,
-                          0b0000000000010000,
-                          0b0000000000100000,
-                          0b0000000001000000,
-                          0b0000000100000000,
-                          0b0000001000000000,
-                          0b0000010000000000,
-                          0b0000100000000000,
-                          0b0001000000000000,
-                          0b0010000000000000,
-                          0b0100000000000000,
-                          0b1000000000000000 };
+uint16_t LEDpattern1; // LED Pattern to send to the 74HC595 chips
+uint16_t LEDArray[16] = {0b0000000000000001,
+                         0b0000000000000010,
+                         0b0000000000000100,
+                         0b0000000000001000,
+                         0b0000000000010000,
+                         0b0000000000100000,
+                         0b0000000001000000,
+                         0b0000000100000000,
+                         0b0000001000000000,
+                         0b0000010000000000,
+                         0b0000100000000000,
+                         0b0001000000000000,
+                         0b0010000000000000,
+                         0b0100000000000000,
+                         0b1000000000000000};
 
 // Setup initial values
-BYTES_VAL_T pinValues = 0;     // new values from  74HC165 chips
-BYTES_VAL_T oldPinValues = 0;  // old values from  74HC165 chips
+BYTES_VAL_T pinValues = 0;    // new values from  74HC165 chips
+BYTES_VAL_T oldPinValues = 0; // old values from  74HC165 chips
 
-BYTES_VAL_T read_values() {
+BYTES_VAL_T read_values()
+{
 
   BYTES_VAL_T bitVal = 0;
   BYTES_VAL_T bytesVal = 0;
@@ -78,14 +78,15 @@ BYTES_VAL_T read_values() {
   // Get data from 74HC165 chips
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, INPUT);
-  for (int i = 0; i < DATA_WIDTH; i++) {
+  for (int i = 0; i < DATA_WIDTH; i++)
+  {
     // Read value in
     bitVal = digitalRead(dataPin);
 
-    //Set the corresponding bit in bytesVal
+    // Set the corresponding bit in bytesVal
     bytesVal |= (bitVal << (DATA_WIDTH - 1 - i));
 
-    //Pulse the Clock - rising edge shifts next bit in
+    // Pulse the Clock - rising edge shifts next bit in
     digitalWrite(clockPin, HIGH);
     delayMicroseconds(1);
     digitalWrite(clockPin, LOW);
@@ -97,12 +98,12 @@ BYTES_VAL_T read_values() {
 // Function dedlarations
 //
 void move_servo(int srv, bool open, bool off, bool init = false);
-void print_message(String message,  bool lcdout = true, bool serialout = true);
+void print_message(String message, bool lcdout = true, bool serialout = true);
 void set_LEDS();
 void move_points(int switchNum);
 
-
-void setup() {
+void setup()
+{
   // Setup i2c LCD
   lcd.init();
   lcd.backlight();
@@ -136,11 +137,11 @@ void setup() {
 
   // Setup PWM PCA9685 cards
   pwm.begin();
-  pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+  pwm.setPWMFreq(60); // Analog servos run at ~60 Hz updates
   pwm1.begin();
-  pwm1.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+  pwm1.setPWMFreq(60); // Analog servos run at ~60 Hz updates
   pwm2.begin();
-  pwm2.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+  pwm2.setPWMFreq(60); // Analog servos run at ~60 Hz updates
 
   // Setup NUMSERVOS servos
   // Remember to update ths number when new servos are added.
@@ -148,104 +149,107 @@ void setup() {
   servo[0].pwmcard_socket = 0;
   servo[0].openangle = 145;
   servo[0].closeangle = 65;
-  servo[0].currangle = servo[0].closeangle;
+  servo[0].currangle = servo[0].openangle;
 
   servo[1].pwmcard = pwm;
   servo[1].pwmcard_socket = 1;
   servo[1].openangle = 110;
   servo[1].closeangle = 60;
-  servo[1].currangle = servo[1].closeangle;
+  servo[1].currangle = servo[1].openangle;
 
   servo[2].pwmcard = pwm;
   servo[2].pwmcard_socket = 2;
   servo[2].openangle = 120;
   servo[2].closeangle = 60;
-  servo[2].currangle = servo[2].closeangle;
+  servo[2].currangle = servo[2].openangle;
 
   servo[3].pwmcard = pwm;
   servo[3].pwmcard_socket = 3;
   servo[3].openangle = 125;
   servo[3].closeangle = 55;
-  servo[3].currangle = servo[3].closeangle;
+  servo[3].currangle = servo[3].openangle;
 
   servo[16].pwmcard = pwm1;
   servo[16].pwmcard_socket = 0;
   servo[16].openangle = 130;
   servo[16].closeangle = 60;
-  servo[16].currangle = servo[16].closeangle;
+  servo[16].currangle = servo[16].openangle;
 
   servo[17].pwmcard = pwm1;
   servo[17].pwmcard_socket = 1;
   servo[17].openangle = 70;
   servo[17].closeangle = 130;
-  servo[17].currangle = servo[17].closeangle;
+  servo[17].currangle = servo[17].openangle;
 
   servo[18].pwmcard = pwm1;
   servo[18].pwmcard_socket = 2;
   servo[18].openangle = 60;
   servo[18].closeangle = 120;
-  servo[18].currangle = servo[18].closeangle;
+  servo[18].currangle = servo[18].openangle;
 
   servo[19].pwmcard = pwm1;
   servo[19].pwmcard_socket = 3;
   servo[19].openangle = 135;
   servo[19].closeangle = 60;
-  servo[19].currangle = servo[19].closeangle;
+  servo[19].currangle = servo[19].openangle;
 
   servo[20].pwmcard = pwm1;
   servo[20].pwmcard_socket = 4;
   servo[20].openangle = 120;
   servo[20].closeangle = 60;
-  servo[20].currangle = servo[20].closeangle;
+  servo[20].currangle = servo[20].openangle;
 
   servo[21].pwmcard = pwm1;
   servo[21].pwmcard_socket = 5;
   servo[21].openangle = 120;
   servo[21].closeangle = 60;
-  servo[21].currangle = servo[21].closeangle;
+  servo[21].currangle = servo[21].openangle;
 
   servo[22].pwmcard = pwm1;
   servo[22].pwmcard_socket = 6;
   servo[22].openangle = 65;
   servo[22].closeangle = 130;
-  servo[22].currangle = servo[22].closeangle;
+  servo[22].currangle = servo[22].openangle;
 
   servo[23].pwmcard = pwm1;
   servo[23].pwmcard_socket = 7;
   servo[23].openangle = 65;
   servo[23].closeangle = 135;
-  servo[23].currangle = servo[23].closeangle;
+  servo[23].currangle = servo[23].openangle;
 
   servo[24].pwmcard = pwm1;
   servo[24].pwmcard_socket = 8;
   servo[24].openangle = 130;
   servo[24].closeangle = 60;
-  servo[24].currangle = servo[24].closeangle;
+  servo[24].currangle = servo[24].openangle;
 
   servo[25].pwmcard = pwm1;
   servo[25].pwmcard_socket = 9;
   servo[25].openangle = 120;
   servo[25].closeangle = 70;
-  servo[25].currangle = servo[25].closeangle;
+  servo[25].currangle = servo[25].openangle;
 
   servo[26].pwmcard = pwm1;
   servo[26].pwmcard_socket = 10;
   servo[26].openangle = 140;
   servo[26].closeangle = 60;
-  servo[26].currangle = servo[26].closeangle;
+  servo[26].currangle = servo[26].openangle;
 
   servo[27].pwmcard = pwm1;
   servo[27].pwmcard_socket = 11;
   servo[27].openangle = 120;
   servo[27].closeangle = 60;
-  servo[27].currangle = servo[27].closeangle;
+  servo[27].currangle = servo[27].openangle;
 
-  //Start board in safe positions with all junctions "closed"
-  for (int i = 0; i <= NUMSERVOS - 1; i++) {
-    if (servo[i].pwmcard_socket != NULL) {  // We want to ignore elements not yet filled on the PWM9685 card
+  // Start board in safe positions with all junctions "closed"
+  for (int i = 0; i <= NUMSERVOS - 1; i++)
+  {
+    if (servo[i].openangle != NULL)
+    { // We want to ignore elements not yet filled on the PWM9685 card
       Serial.print("Closing :");
       Serial.println(i);
-      move_servo(i, false, true, true);
+      // move_servo(servo[i].pwmcard_socket, false, true, true);
+      move_servo_old(i, servo[i].closeangle);
       delay(100);
     }
   }
@@ -267,7 +271,8 @@ void setup() {
   Serial.println("Setup done.");
 }
 
-void set_LEDS() {
+void set_LEDS()
+{
   // Set the LEDS that are on / off
   digitalWrite(latchPinOut, LOW);
   shiftOut(dataPinOut, clockPinOut, LSBFIRST, LEDpattern1);
@@ -275,346 +280,398 @@ void set_LEDS() {
   digitalWrite(latchPinOut, HIGH);
 }
 
-
-void print_message(String message,bool lcdout=true, bool serialout=true) {
-  if (serialout) {
+void print_message(String message, bool lcdout = true, bool serialout = true)
+{
+  if (serialout)
+  {
     Serial.println(message);
   }
-  if (lcdout) {
+  if (lcdout)
+  {
     lcd.clear();
     lcd.home();
     lcd.print(message);
   }
 }
-void move_points(int switchNum) {
+void move_points(int switchNum)
+{
   // Move either one or two servos based on which button has been pressed
-  switch (switchNum) {
+  switch (switchNum)
+  {
 
-    case 0:
-      // Button "1:" - Close juction A
-      print_message("Button 1.",false, true);
-      move_servo(16, false, true);
-      LEDpattern1 = bitClear(LEDpattern1, 0);
-      set_LEDS();
-      print_message("Closing - A");
-      delay(500);
-      break;
+  case 0:
+    // Button "1:" - Close juction A
+    print_message("Button 1.", false, true);
+    print_message("Closing - A");
+    move_servo(16, false, false, false);
+    // move_servo(servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].closeangle );
+    LEDpattern1 = bitClear(LEDpattern1, 0);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 1:
-      // Button "2" - Open juntion A
-      print_message("Button 2.",false, true);
-      move_servo (16, true, true); // open point and turn off servo
-      LEDpattern1 = LEDpattern1 | LEDArray[0];
-      set_LEDS();
-      print_message("Opening - A");
-      delay(500);
-      break;
+  case 1:
+    // Button "2" - Open juntion A
+    print_message("Button 2.", false, true);
+    print_message("Opening - A");
+    move_servo(16, true, false, false); // open point and turn off servo
+    // move_servo(servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].openangle );
+    LEDpattern1 = LEDpattern1 | LEDArray[0];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 2:
-      // Button "3" - Close Juction B
-      print_message("Button 3.",false,true);
-      move_servo (17, false, true); // close point and turn off servo
-      LEDpattern1 = bitClear(LEDpattern1, 1);
-      set_LEDS();
-      print_message("Closing - B");
-      delay(500);
-      break;
+  case 2:
+    // Button "3" - Close Juction B
+    print_message("Button 3.", false, true);
+    print_message("Closing - B");
+    move_servo(17, false, false, false); // close point and turn off servo
+    // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].closeangle );
+    LEDpattern1 = bitClear(LEDpattern1, 1);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 3:
-      // Button "4" - Open Juction B
-      print_message("Button 4.",false, true);
-      move_servo (17, true, true); // open point and turn off servo
-      LEDpattern1 = LEDpattern1 | LEDArray[1];
-      set_LEDS();
-      print_message("Opening - B");
-      delay(500);
-      break;
+  case 3:
+    // Button "4" - Open Juction B
+    print_message("Button 4.", false, true);
+    print_message("Opening - B");
+    move_servo(17, true, false, false); // open point and turn off servo
+    // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].openangle );
+    LEDpattern1 = LEDpattern1 | LEDArray[1];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 4:
-      // Button "5" - Close Juction C
-      print_message("Button 5.",false, true);
-      move_servo (18, false, true);  // Close point and turn off servo
-      LEDpattern1 = bitClear(LEDpattern1, 2);
-      set_LEDS();
-      print_message("Closing - C ");
-      delay(500);
-      break;
+  case 4:
+    // Button "5" - Close Juction C
+    print_message("Button 5.", false, true);
+    print_message("Closing - C ");
+    move_servo(18, false, true); // Close point and turn off servo
+    LEDpattern1 = bitClear(LEDpattern1, 2);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 5:
-      // Button "6" - Open Juction C
-      print_message("Button 6.",false, true);
-      move_servo (18, true, true);  // open point and turn off servo
-      LEDpattern1 = LEDpattern1 | LEDArray[2];
-      set_LEDS();
-      print_message("Opening - C");
-      delay(500);
-      break;
+  case 5:
+    // Button "6" - Open Juction C
+    print_message("Button 6.", false, true);
+    print_message("Opening - C");
+    move_servo(18, true, true); // open point and turn off servo
+    LEDpattern1 = LEDpattern1 | LEDArray[2];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 6:
-      // Button "7" - Close Juction D
-      print_message("Button 7.",false, true);
-      move_servo (2, false, true); //close point and turn off servo
-      move_servo (19, false, true);  //close point and turn off servo
-      LEDpattern1 = bitClear(LEDpattern1, 3);
-      set_LEDS();
-      print_message("Closing - D ");
-      delay(500);
-      break;
+  case 6:
+    // Button "7" - Close Juction D
+    print_message("Button 7.", false, true);
+    print_message("Closing - D ");
+    move_servo(2, false, true);  // close point and turn off servo
+    move_servo(19, false, true); // close point and turn off servo
+    LEDpattern1 = bitClear(LEDpattern1, 3);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 7:
-      // Button "8" - Open Juction D
-      print_message("Button 8.",false,true);
-      move_servo (2, true, true); // open point and turn off servo
-      move_servo (19, true, true); // open point and turn off servo
-      LEDpattern1 = LEDpattern1 | LEDArray[3];
-      set_LEDS();
-      lcd.print("Opening - D");
-      delay(500);
-      break;
+  case 7:
+    // Button "8" - Open Juction D
+    print_message("Button 8.", false, true);
+    print_message("Opening - D");
+    move_servo(2, true, true);  // open point and turn off servo
+    move_servo(19, true, true); // open point and turn off servo
+    LEDpattern1 = LEDpattern1 | LEDArray[3];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 8:
-      // Button "9" - Close Juction E
-      print_message("Button 9.",false, true);
-      move_servo (20, false, true); //Close point and turn off servo
-      move_servo (21, false, true); //Close point and turn off servo
-      LEDpattern1 = bitClear(LEDpattern1, 4);
-      set_LEDS();
-      print_message("Closing - E");
-      delay(500);
-      break;
+  case 8:
+    // Button "9" - Close Juction E
+    print_message("Button 9.", false, true);
+    print_message("Closing - E");
+    move_servo(20, false, true); // Close point and turn off servo
+    move_servo(21, false, true); // Close point and turn off servo
+    LEDpattern1 = bitClear(LEDpattern1, 4);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 9:
-      // Button "10" - Open Juction E
-      print_message("Button 10.",false, true);
-      move_servo (20, true, true); //Open point and turn off servo
-      move_servo (21, true, true); //Open point and turn off servo
-      LEDpattern1 = LEDpattern1 | LEDArray[4];
-      set_LEDS();
-      print_message("Opening - E ");
-      delay(500);
-      break;
+  case 9:
+    // Button "10" - Open Juction E
+    print_message("Button 10.", false, true);
+    move_servo(20, true, true); // Open point and turn off servo
+    move_servo(21, true, true); // Open point and turn off servo
+    LEDpattern1 = LEDpattern1 | LEDArray[4];
+    set_LEDS();
+    print_message("Opening - E ");
+    delay(500);
+    break;
 
-    case 10:
-      // Button "11" - Close Juction F
-      print_message("Buton 11.",false, true);
-      move_servo (22, false, true);
-      move_servo (23, false, true);    
-      LEDpattern1 = LEDpattern1 | LEDArray[5];
-      set_LEDS();
-      print_message("Closing - F ");
-      delay(500);
-      break;
+  case 10:
+    // Button "11" - Close Juction F
+    print_message("Button 11.", false, true);
+    print_message("Closing - F ");
+    move_servo(22, false, true);
+    move_servo(23, false, true);
+    LEDpattern1 = LEDpattern1 | LEDArray[5];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 11:
-      // Button "12" - Open Juction F
-      print_message("Buton 12.",false,true);
-      move_servo (22, true, true);
-      move_servo (23, true, true);     
-      LEDpattern1 = bitClear(LEDpattern1, 5);
-      set_LEDS();
-      print_message("Opening - F ");
-      delay(500);
-      break;
+  case 11:
+    // Button "12" - Open Juction F
+    print_message("Button 12.", false, true);
+    print_message("Opening - F ");
+    move_servo(22, true, true);
+    move_servo(23, true, true);
+    LEDpattern1 = bitClear(LEDpattern1, 5);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 12:
-      // Button "13" - Close Juction G
-      print_message("Buton 13.",false,true);
-      move_servo (24, false, true);
-      LEDpattern1 = LEDpattern1 | LEDArray[6];
-      set_LEDS();
-      print_message("Closing - G ");
-      delay(500);
-      break;
+  case 12:
+    // Button "13" - Close Juction G
+    print_message("Button 13.", false, true);
+    print_message("Closing - G ");    
+    move_servo(24, false, true);
+    LEDpattern1 = LEDpattern1 | LEDArray[6];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 13:
-      // Button "14" - Open Juction G
-      print_message("Buton 14.",false, true);
-      move_servo (24, true, true);
-      LEDpattern1 = bitClear(LEDpattern1, 6);
-      set_LEDS();
-      print_message("Openging - G ");
-      delay(500);
-      break;
+  case 13:
+    // Button "14" - Open Juction G
+    print_message("Button 14.", false, true);
+    print_message("Openging - G ");    
+    move_servo(24, true, true);
+    LEDpattern1 = bitClear(LEDpattern1, 6);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 14:
-      // Button "15" - CLose Juction H
-      print_message("Buton 15.",false, true);
-      move_servo (25, false, true);
-      LEDpattern1 = LEDpattern1 | LEDArray[7];
-      set_LEDS();
-      print_message("Closing - H");
-      delay(500);
-      break;
+  case 14:
+    // Button "15" - CLose Juction H
+    print_message("Button 15.", false, true);
+    print_message("Closing - H");    
+    move_servo(25, false, true);
+    LEDpattern1 = LEDpattern1 | LEDArray[7];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 15:
-      // Button "16" - Open Juction H
-      Serial.print("Buton 16.");
-      move_servo (25, true, true);
-      LEDpattern1 = bitClear(LEDpattern1, 7);
-      set_LEDS();
-      lcd.print("Opening - H ");
-      delay(500);
-      break;
+  case 15:
+    // Button "16" - Open Juction H
+    print_message("Button 16.", false, true);
+    print_message("Opening - H ");
+    move_servo(25, true, true);
+    LEDpattern1 = bitClear(LEDpattern1, 7);
+    set_LEDS();
 
-    case 16:
-      // Button "17" - Close Juction I
-      print_message("Buton 17.",false, true);
-      move_servo (26, false, true);
-      LEDpattern1 = LEDpattern1 | LEDArray[8];
-      set_LEDS();
-      print_message("Closing - I");
-      delay(500);
-      break;
+    delay(500);
+    break;
 
-    case 17:
-      // Button "18" - Open Juction I
-      print_message("Buton 18.");
-      move_servo (26, true, true);
-      LEDpattern1 = bitClear(LEDpattern1, 8);
-      set_LEDS();
-      print_message("Opening - I ");
-      delay(500);
-      break;
+  case 16:
+    // Button "17" - Close Juction I
+    print_message("Button 17.", false, true);
+    print_message("Closing - I");
+    move_servo(26, false, true);
+    LEDpattern1 = LEDpattern1 | LEDArray[8];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 18:
-      // Button "19" - close Juction J
-      print_message("Buton 19.",false, true);
-      move_servo (27, false, true);
-      LEDpattern1 = LEDpattern1 | LEDArray[9];
-      set_LEDS();
-      print_message("Closing - J ");
-      delay(500);
-      break;
+  case 17:
+    // Button "18" - Open Juction I
+    print_message("Button 18.",false, true);
+    print_message("Opening - I ");
+    move_servo(26, true, true);
+    LEDpattern1 = bitClear(LEDpattern1, 8);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 19:
-      // Button "20" - open Juction J
-      print_message("Buton 20.",false,true);
-      move_servo (27, true, true);
-      LEDpattern1 = bitClear(LEDpattern1, 9);
-      set_LEDS();
-      print_message("Opening - J ");
-      delay(500);
-      break;
+  case 18:
+    // Button "19" - close Juction J
+    print_message("Button 19.", false, true);
+    print_message("Closing - J ");    
+    move_servo(27, false, true);
+    LEDpattern1 = LEDpattern1 | LEDArray[9];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 20:
-      // Button "21" - close Juction k
-      print_message("Buton 21.",false,true);
-      move_servo (0, false, true);
-      move_servo (1, false, true);
-      LEDpattern1 = LEDpattern1 | LEDArray[10];
-      set_LEDS();
-      print_message("Closing - k");
-      delay(500);
-      break;
+  case 19:
+    // Button "20" - open Juction J
+    print_message("Button 20.", false, true);
+    print_message("Opening - J ");    
+    move_servo(27, true, true);
+    LEDpattern1 = bitClear(LEDpattern1, 9);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 21:
-      // Button "22" - open Juction k
-      print_message("Buton 22.",false,true);
-      move_servo (0, true, true);
-      move_servo (1, true, true);
-      LEDpattern1 = bitClear(LEDpattern1, 10);
-      set_LEDS();
-      print_message("Opening - k ");
-      delay(500);
-      break;
+  case 20:
+    // Button "21" - close Juction k
+    print_message("Button 21.", false, true);
+    print_message("Closing - k");    
+    move_servo(0, false, true);
+    move_servo(1, false, true);
+    LEDpattern1 = LEDpattern1 | LEDArray[10];
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 22:
-      // Button "21" - Close Juction L
-      print_message("Buton 22.",false, true);
-      move_servo (3, false, true);
-      LEDpattern1 = LEDpattern1 | LEDArray[11];
-      set_LEDS();
-      print_message("Closing - L");
-      delay(500);
-      break;
+  case 21:
+    // Button "22" - open Juction k
+    print_message("Button 22.", false, true);
+    print_message("Opening - k ");    
+    move_servo(0, true, true);
+    move_servo(1, true, true);
+    LEDpattern1 = bitClear(LEDpattern1, 10);
+    set_LEDS();
+    delay(500);
+    break;
 
-    case 23:
-      // Button "23" - Open Juction L
-      print_message("Buton 23.",false, true);
-      move_servo (3, true, true);
-      LEDpattern1 = bitClear(LEDpattern1, 11);
-      set_LEDS();
-      print_message("Opening - L ");
-      delay(500);
-      break;
-    default:
-      // default - it's broken
-      String message;
-      message="Default: " + switchNum;
-      print_message(message);
-      print_message("Failure...");
-      break;
+  case 22:
+    // Button "21" - Close Juction L
+    print_message("Button 22.", false, true);
+    print_message("Closing - L");    
+    move_servo(3, false, true);
+    LEDpattern1 = LEDpattern1 | LEDArray[11];
+    set_LEDS();
+
+    delay(500);
+    break;
+
+  case 23:
+    // Button "23" - Open Juction L
+    print_message("Button 23.",false, true);
+    print_message("Opening - L ");    
+    move_servo (3, true, true);
+    LEDpattern1 = bitClear(LEDpattern1, 11);
+    set_LEDS();
+    delay(500);
+    break;
+  default:
+    // default - it's broken
+    String message;
+    message = "Default: " + switchNum;
+    print_message(message);
+    print_message("Failure...");
+    break;
   }
 }
 
-// int angleToPulse(int ang) {
-//   int pulse = map(ang, 0, 180, SERVOMIN, SERVOMAX);  // map angle of 0 to 180 to Servo min and Servo max
-//   return pulse;
-// }
+int angleToPulse(int ang)
+{
+  int pulse = map(ang, 0, 180, SERVOMIN, SERVOMAX); // map angle of 0 to 180 to Servo min and Servo max
+  return pulse;
+}
 
-// void move_servo(Adafruit_PWMServoDriver pwmcard, int srv, int ang) {
-//   pwmcard.setPWM(srv, 0, angleToPulse(ang));
-//   Serial.print("moving servo ");
-//   Serial.print(srv);
-//   Serial.print(" to angle ");
-//   Serial.println(ang);
-// }
+void move_servo_old(int srv, int ang)
+{
+  // Serial.print("moving servo ");
+  // Serial.print(srv);
+  // Serial.print(" to angle ");
+  // Serial.println(ang);
+  servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, angleToPulse(ang));
+  servo[srv].currangle = ang;
+}
 
-void move_servo(int srv, bool open, bool off, bool init = false) {
-  int ang = 90;  // 90 is a safe agnle to set to if something is borked
-  int pulselength = 0;
-  if (open) {  // We want to open the point
+void move_servo(int srv, bool open, bool off, bool init = false)
+{
+  byte ang = 90; // 90 is a safe agnle to set to if something is borked
+  byte pulselength = 0;
+  // Serial.println("move_servo start");
+  // Serial.print("Current angle is: ");
+  // Serial.println(servo[srv].currangle);
+  if (open)
+  { // We want to open the point
     ang = servo[srv].openangle;
-  } else {  // We want to close the point
+    // Serial.println("open");
+    // Serial.print("Current angle in OPEN is: ");
+    // Serial.println(servo[srv].currangle);
+    // Serial.print("Target angle is: ");
+    // Serial.println(ang);
+  }
+  else
+  { // We want to close the point
     ang = servo[srv].closeangle;
+    // Serial.println("close");
+    // Serial.print("Current angle in CLOSE is: ");
+    // Serial.println(servo[srv].currangle);
+    // Serial.print("Target angle is: ");
+    // Serial.println(ang);
   }
   // Are we initialising - init=true
-  if (init) {
-    Serial.print(srv);
-    Serial.print(",");
-    //currangle is not valid. Close  points and set currangle to closeangle
-    Serial.print(servo[srv].currangle);
-    Serial.print(",");
-    int pulselength = map(servo[srv].closeangle, 0, 180, SERVOMIN, SERVOMAX);  // map angle of 0 to 180 to Servo min and Servo max
-    servo[srv].pwmcard.setPWM(srv, 0, pulselength);
-    servo[srv].currangle = servo[srv].closeangle;
-    Serial.print(servo[srv].currangle);
-    Serial.print(",");
-    Serial.println(servo[srv].closeangle);
-    if (off) {  // There's no real load on the servo so we can disable it after it's moved. Saves a bit of power and stops it hunting
+  if (init)
+  {
+    Serial.println("init");
+    // currangle is not valid. Close  points and set currangle to closeangle
+    pulselength = map(servo[srv].closeangle, 0, 180, SERVOMIN, SERVOMAX); // map angle of 0 to 180 to Servo min and Servo max
+    servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
+    if (off)
+    { // There's no real load on the servo so we can disable it after it's moved. Saves a bit of power and stops it hunting
       servo[srv].pwmcard.setPWM(srv, 0, 4096);
-      }
-  } else {
+    }
+    servo[srv].currangle = servo[srv].closeangle;
+    Serial.println(servo[srv].currangle);
+  }
+  else
+  {
     // ok - slow servo move.
-    Serial.println("Slow move");
-    if (servo[srv].currangle == ang) {
-      Serial.println("currangle is 90");
+    // Serial.println("Slow move");
+    // Serial.print("Current angle in SLOW START is: ");
+    // Serial.println(servo[srv].currangle);
+    if (servo[srv].currangle == ang)
+    {
+      // Serial.println("currangle is set already");
       return;
     }
-    else if (ang > servo[srv].currangle) {
-      Serial.println("currangle is 90");
-      for (int i = servo[srv].currangle; i < ang; i++) {
+    else if (ang > servo[srv].currangle)
+    {
+      // Serial.print("currangle is ");
+      // Serial.print(servo[srv].currangle);
+      // Serial.print(" < ");
+      // Serial.println(ang);
+      for (int i = servo[srv].currangle; i < ang; i++)
+      {
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
-        servo[srv].pwmcard.setPWM(srv, 0, pulselength);
+        // Serial.println(pulselength);
+        servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
         delay(30);
       }
-    } else if (servo[srv].currangle > ang) {
-      for (int i = servo[srv].currangle; i > ang; i--) {
+      servo[srv].currangle = ang;
+    }
+    else if (servo[srv].currangle > ang)
+    {
+      // Serial.print("currangle is ");
+      // Serial.print(servo[srv].currangle);
+      // Serial.print(" > ");
+      // Serial.println(ang);
+      for (int i = servo[srv].currangle; i > ang; i--)
+      {
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
-        servo[srv].pwmcard.setPWM(srv, 0, pulselength);
+        servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
+        // Serial.println(pulselength);
         delay(30);
       }
+      servo[srv].currangle = ang;
     }
   }
 }
 
-void loop() {
+void loop()
+{
   // Read all pin values
   pinValues = read_values();
   // Process any changes in the values and call to move_points
-  if (pinValues != oldPinValues) {
-    for (int i = 0; i < DATA_WIDTH; i++) {
-      if ((pinValues >> i) & 1) {
+  if (pinValues != oldPinValues)
+  {
+    for (int i = 0; i < DATA_WIDTH; i++)
+    {
+      if ((pinValues >> i) & 1)
+      {
         move_points(i);
       }
     }
