@@ -200,8 +200,8 @@ void setup()
 
   servo[20].pwmcard = pwm1;
   servo[20].pwmcard_socket = 4;
-  servo[20].openangle = 120;
-  servo[20].closeangle = 60;
+  servo[20].openangle = 60;
+  servo[20].closeangle = 120;
   servo[20].currangle = servo[20].openangle;
 
   servo[21].pwmcard = pwm1;
@@ -243,7 +243,7 @@ void setup()
   servo[27].pwmcard = pwm1;
   servo[27].pwmcard_socket = 11;
   servo[27].openangle = 120;
-  servo[27].closeangle = 60;
+  servo[27].closeangle = 55;
   servo[27].currangle = servo[27].openangle;
 
   // Start board in safe positions with all junctions "closed"
