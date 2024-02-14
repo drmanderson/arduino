@@ -42,33 +42,18 @@ const int clockPinOut = 10; // Connects to the SRCLK ping of the 595 (11) SH_CP
 const int dataPinOut = 11;  // Connects to the SER pin of the 595 (14) DS
 
 // 74HC595 RELAY pins
-const int latchPinS = 14; // Connects to the RCLK pin of the 595 (12)  ST_CP
-const int clockPinS = 15; // Connects to the SRCLK ping of the 595 (11) SH_CP
-const int dataPinS = 16;  // Connects to the SER pin of the 595 (14) DS
-const int OEPinS = 17;    // Connects to OE pin of the 595 (13)
+const int latchPinS = 16; // Connects to the RCLK pin of the 595 (12)  ST_CP
+const int clockPinS = 17; // Connects to the SRCLK ping of the 595 (11) SH_CP
+const int dataPinS = 15;  // Connects to the SER pin of the 595 (14) DS
+const int OEPinS = 8;    // Connects to OE pin of the 595 (13)
 
 const int readyLED = 2;
 
-uint16_t LEDpattern1; // LED Pattern to send to the 74HC595 chips
-uint16_t tempVal;
-uint16_t LEDArray[16] = {0b0000000000000001,
-                         0b0000000000000010,
-                         0b0000000000000100,
-                         0b0000000000001000,
-                         0b0000000000010000,
-                         0b0000000000100000,
-                         0b0000000001000000,
-                         0b0000000100000000,
-                         0b0000001000000000,
-                         0b0000010000000000,
-                         0b0000100000000000,
-                         0b0001000000000000,
-                         0b0010000000000000,
-                         0b0100000000000000,
-                         0b1000000000000000};
-
-uint8_t RELAYPattern = 0;
-uint8_t relayArray[8] = {1, 2, 4, 8, 16, 32, 64, 128};
+long LEDpattern; // LED Pattern to send to the 74HC595 chips
+long tempVal;
+long LEDArray[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 ,32768 };
+long RELAYPattern = 0;
+long relayArray[8] = {1, 2, 4, 8, 16, 32, 64, 128};
 // Setup initial values
 BYTES_VAL_T pinValues = 0;    // new values from  74HC165 chips
 BYTES_VAL_T oldPinValues = 0; // old values from  74HC165 chips
@@ -109,11 +94,12 @@ void move_servo(int srv, bool open, bool off, bool init = false)
 {
   byte ang = 90; // 90 is a safe agnle to set to if something is borked
   byte pulselength = 0;
+  int temp;
   // Are we initialising - init=true
   if (init)
   {
-    Serial.println("init");
-    // currangle is not valid. Close  points and set currangle to closeangle
+    // Serial.println("init");
+    //  currangle is not valid. Close  points and set currangle to closeangle
     pulselength = map(servo[srv].closeangle, 0, 180, SERVOMIN, SERVOMAX); // map angle of 0 to 180 to Servo min and Servo max
     servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
     if (off)
@@ -121,63 +107,97 @@ void move_servo(int srv, bool open, bool off, bool init = false)
       servo[srv].pwmcard.setPWM(srv, 0, 4096);
     }
     servo[srv].currangle = servo[srv].closeangle;
-    Serial.println(servo[srv].currangle);
+    // Serial.println(servo[srv].currangle);
   }
   else // OK - not initializing - system is up and running - we're opening or closing a point
   {
     if (open)
     { // We want to open the point
       ang = servo[srv].openangle;
-      // If there is a servo associated with the point set it to be activated.
-      // Definition - open is NC on the Servo
-      //              closed is NO on the Servo
-      if (servo[srv].relay > 0 ) {
-        // Bitlogin to control relays as using 74HC595 chip's outputs to hold the servo open
-        RELAYPattern = RELAYPattern | (relayArray[servo[srv].relay] - 1);
-      }
     }
     else
     { // We want to close the point
       ang = servo[srv].closeangle;
-      if (swervo[srv].relay > 0 ){
-        // If there is a relay associated with the point closed if NO so switch off the 74HC595 pin
-        tempVal = RELAYPattern;
-        RELAYPattern = bitclear(tempVal, (servo[srv].relay - 1))
-      }
     }
+    //
+    // We've figured out open and close settings now to move servos and set relays
+    //
     if (servo[srv].currangle == ang)
     {
       // Serial.println("currangle is set already");
+      Serial.println("No change");
       return;
     }
     else if (ang > servo[srv].currangle)
     {
-      int diff = ang - servo[srv].currangle;
+      //int diff = (ang - servo[srv].currangle) / 2;
+      //Serial.println(diff);
+      if (servo[srv].relay != 0)
+      {
+        Serial.print("    Relay to change ");
+        Serial.print(servo[srv].relay);
+        Serial.print(" ");
+        Serial.print(relayArray[servo[srv].relay]);
+        // Bitlogin to control relays as using 74HC595 chip's outputs to hold the servo open
+        temp = (relayArray[(servo[srv].relay -1)]);
+        Serial.print(" ");
+        Serial.print(temp);
+        RELAYPattern = RELAYPattern |temp;
+        Serial.print(" ");
+        Serial.println(RELAYPattern);
+      }      
       for (int i = servo[srv].currangle; i < ang; i++)
       {
+        // Serial.println(i);
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
         // Serial.println(pulselength);
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
-        if (diff >= i ){
-          set_relay();
-        }
+        //Serial.println(i - servo[srv].currangle);
+        //if (diff == (i - servo[srv].currangle))
+        //{
+        //  Serial.println("set_relay");
+        //  set_relay();
+        //}
         delay(30);
       }
+      Serial.println("set_relay");
+      set_relay();      
       servo[srv].currangle = ang;
     }
     else if (servo[srv].currangle > ang)
     {
-      int diff = servo[srv].currangle - ang;
+      //int diff = (servo[srv].currangle - ang) / 2;
+      // Serial.println(diff);
+      if (servo[srv].relay != 0)
+      {
+        Serial.print("    Relay to change ");
+        Serial.print(servo[srv].relay);
+        Serial.print(" ");
+        Serial.print(relayArray[servo[srv].relay]);
+        // If there is a relay associated with the point closed if NO so switch off the 74HC595 pin
+        temp = (relayArray[(servo[srv].relay -1)]);
+        Serial.print(" ");
+        Serial.print(temp);
+        RELAYPattern = RELAYPattern ^ temp;
+        Serial.print(" ");
+        Serial.println(RELAYPattern);
+      }      
       for (int i = servo[srv].currangle; i > ang; i--)
       {
+        // Serial.println(i);
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
-        if {i <= diff} {
-          set_relay();
-        }
+        //Serial.println(i + servo[srv].currangle);
+        //if ((i + servo[srv].currangle) == diff)
+        //{
+        //  Serial.println("set_relay");
+        //  set_relay();
+        //}
         // Serial.println(pulselength);
         delay(30);
       }
+      Serial.println("set_relay");
+      set_relay();      
       servo[srv].currangle = ang;
     }
   }
@@ -223,7 +243,7 @@ void setup()
   digitalWrite(OEPinS, LOW);
 
   // initialise the 74HC595 with all LED off 0b0000000000000000
-  LEDpattern1 = 0b0000000000000000;
+  LEDpattern = 0b0000000000000000;
   set_LEDS();
 
   // Setup PWM PCA9685 cards
@@ -264,24 +284,28 @@ void setup()
   servo[16].pwmcard_socket = 0;
   servo[16].openangle = 130;
   servo[16].closeangle = 60;
+  servo[16].relay = 1;
   servo[16].currangle = servo[16].openangle;
 
   servo[17].pwmcard = pwm1;
   servo[17].pwmcard_socket = 1;
   servo[17].openangle = 70;
   servo[17].closeangle = 130;
+  servo[17].relay = 2;
   servo[17].currangle = servo[17].openangle;
 
   servo[18].pwmcard = pwm1;
   servo[18].pwmcard_socket = 2;
   servo[18].openangle = 60;
   servo[18].closeangle = 120;
+  servo[18].relay = 3;  
   servo[18].currangle = servo[18].openangle;
 
   servo[19].pwmcard = pwm1;
   servo[19].pwmcard_socket = 3;
   servo[19].openangle = 135;
   servo[19].closeangle = 60;
+  servo[19].relay = 4;  
   servo[19].currangle = servo[19].openangle;
 
   servo[20].pwmcard = pwm1;
@@ -346,16 +370,16 @@ void setup()
   }
   Serial.println("Flashing Leds");
   // Flash all the LEDS
-  LEDpattern1 = 0b1111111111111111;
+  LEDpattern = 0b1111111111111111;
   set_LEDS();
   delay(500);
-  LEDpattern1 = 0b0000000000000000;
+  LEDpattern = 0b0000000000000000;
   set_LEDS();
   delay(500);
-  LEDpattern1 = 0b1111111111111111;
+  LEDpattern = 0b1111111111111111;
   set_LEDS();
   delay(500);
-  LEDpattern1 = 0b0000000000000000;
+  LEDpattern = 0b0000000000000000;
   set_LEDS();
   delay(500);
   lcd.print("Setup done.");
@@ -364,16 +388,18 @@ void setup()
 
 void set_LEDS()
 {
+  // Serial.print("LEDpattern... ");
+  // Serial.println(LEDpattern);
   // Set the LEDS that are on / off
   digitalWrite(latchPinOut, LOW);
-  shiftOut(dataPinOut, clockPinOut, LSBFIRST, LEDpattern1);
-  shiftOut(dataPinOut, clockPinOut, LSBFIRST, (LEDpattern1 >> 8));
+  shiftOut(dataPinOut, clockPinOut, LSBFIRST, LEDpattern);
+  shiftOut(dataPinOut, clockPinOut, LSBFIRST, (LEDpattern >> 8));
   digitalWrite(latchPinOut, HIGH);
 }
 
-void set_relay(uint16_t)
+void set_relay()
 {
-  Serial.print("RELAYPattern... ");
+  Serial.print("    RELAYPattern... ");
   Serial.println(RELAYPattern);
   // ST_CP LOW to keep LEDs from changing while reading serial data
   digitalWrite(latchPinS, LOW);
@@ -409,8 +435,7 @@ void move_points(int switchNum)
     print_message("Closing - A");
     move_servo(16, false, false, false);
     // move_servo(servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].closeangle );
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 0);
+    LEDpattern = LEDpattern ^ LEDArray[0];
     set_LEDS();
     delay(500);
     break;
@@ -421,8 +446,7 @@ void move_points(int switchNum)
     print_message("Opening - A");
     move_servo(16, true, false, false); // open point and turn off servo
     // move_servo(servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].openangle );
-    tempVal = LEDpattern1;
-    LEDpattern1 = LEDpattern1 | LEDArray[0];
+    LEDpattern = LEDpattern | LEDArray[0];
     set_LEDS();
     delay(500);
     break;
@@ -432,9 +456,8 @@ void move_points(int switchNum)
     print_message("Button 3.", false, true);
     print_message("Closing - B");
     move_servo(17, false, false, false); // close point and turn off servo
-                                         // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].closeangle );
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 1);
+    // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].closeangle );
+    LEDpattern = LEDpattern ^ LEDArray[1];
     set_LEDS();
     delay(500);
     break;
@@ -445,7 +468,7 @@ void move_points(int switchNum)
     print_message("Opening - B");
     move_servo(17, true, false, false); // open point and turn off servo
     // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].openangle );
-    LEDpattern1 = LEDpattern1 | LEDArray[1];
+    LEDpattern = LEDpattern | LEDArray[1];
     set_LEDS();
     delay(500);
     break;
@@ -455,8 +478,7 @@ void move_points(int switchNum)
     print_message("Button 5.", false, true);
     print_message("Closing - C ");
     move_servo(18, false, true); // Close point and turn off servo
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 2);
+    LEDpattern = LEDpattern ^ LEDArray[2];
     set_LEDS();
     delay(500);
     break;
@@ -466,7 +488,7 @@ void move_points(int switchNum)
     print_message("Button 6.", false, true);
     print_message("Opening - C");
     move_servo(18, true, true); // open point and turn off servo
-    LEDpattern1 = LEDpattern1 | LEDArray[2];
+    LEDpattern = LEDpattern | LEDArray[2];
     set_LEDS();
     delay(500);
     break;
@@ -477,8 +499,7 @@ void move_points(int switchNum)
     print_message("Closing - D ");
     move_servo(2, false, true);  // close point and turn off servo
     move_servo(19, false, true); // close point and turn off servo
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 3);
+    LEDpattern = LEDpattern ^ LEDArray[3];
     set_LEDS();
     delay(500);
     break;
@@ -489,7 +510,7 @@ void move_points(int switchNum)
     print_message("Opening - D");
     move_servo(2, true, true);  // open point and turn off servo
     move_servo(19, true, true); // open point and turn off servo
-    LEDpattern1 = LEDpattern1 | LEDArray[3];
+    LEDpattern = LEDpattern | LEDArray[3];
     set_LEDS();
     delay(500);
     break;
@@ -500,8 +521,7 @@ void move_points(int switchNum)
     print_message("Closing - E");
     move_servo(20, false, true); // Close point and turn off servo
     move_servo(21, false, true); // Close point and turn off servo
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 4);
+    LEDpattern = LEDpattern ^ LEDArray[4];
     set_LEDS();
     delay(500);
     break;
@@ -511,7 +531,7 @@ void move_points(int switchNum)
     print_message("Button 10.", false, true);
     move_servo(20, true, true); // Open point and turn off servo
     move_servo(21, true, true); // Open point and turn off servo
-    LEDpattern1 = LEDpattern1 | LEDArray[4];
+    LEDpattern = LEDpattern | LEDArray[4];
     set_LEDS();
     print_message("Opening - E ");
     delay(500);
@@ -523,7 +543,7 @@ void move_points(int switchNum)
     print_message("Closing - F ");
     move_servo(22, false, true);
     move_servo(23, false, true);
-    LEDpattern1 = LEDpattern1 | LEDArray[5];
+    LEDpattern = LEDpattern ^ LEDArray[5];    
     set_LEDS();
     delay(500);
     break;
@@ -534,8 +554,7 @@ void move_points(int switchNum)
     print_message("Opening - F ");
     move_servo(22, true, true);
     move_servo(23, true, true);
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 5);
+    LEDpattern = LEDpattern | LEDArray[5];
     set_LEDS();
     delay(500);
     break;
@@ -545,7 +564,7 @@ void move_points(int switchNum)
     print_message("Button 13.", false, true);
     print_message("Closing - G ");
     move_servo(24, false, true);
-    LEDpattern1 = LEDpattern1 | LEDArray[6];
+    LEDpattern = LEDpattern ^ LEDArray[6];    
     set_LEDS();
     delay(500);
     break;
@@ -555,8 +574,7 @@ void move_points(int switchNum)
     print_message("Button 14.", false, true);
     print_message("Openging - G ");
     move_servo(24, true, true);
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 6);
+    LEDpattern = LEDpattern | LEDArray[6];
     set_LEDS();
     delay(500);
     break;
@@ -566,7 +584,7 @@ void move_points(int switchNum)
     print_message("Button 15.", false, true);
     print_message("Closing - H");
     move_servo(25, false, true);
-    LEDpattern1 = LEDpattern1 | LEDArray[7];
+    LEDpattern = LEDpattern ^LEDArray[7];   
     set_LEDS();
     delay(500);
     break;
@@ -576,10 +594,8 @@ void move_points(int switchNum)
     print_message("Button 16.", false, true);
     print_message("Opening - H ");
     move_servo(25, true, true);
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 7);
+    LEDpattern = LEDpattern | LEDArray[7];
     set_LEDS();
-
     delay(500);
     break;
 
@@ -588,7 +604,7 @@ void move_points(int switchNum)
     print_message("Button 17.", false, true);
     print_message("Closing - I");
     move_servo(26, false, true);
-    LEDpattern1 = LEDpattern1 | LEDArray[8];
+    LEDpattern = LEDpattern ^ LEDArray[8]; 
     set_LEDS();
     delay(500);
     break;
@@ -598,8 +614,7 @@ void move_points(int switchNum)
     print_message("Button 18.", false, true);
     print_message("Opening - I ");
     move_servo(26, true, true);
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 8);
+    LEDpattern = LEDpattern | LEDArray[8];    
     set_LEDS();
     delay(500);
     break;
@@ -609,7 +624,7 @@ void move_points(int switchNum)
     print_message("Button 19.", false, true);
     print_message("Closing - J ");
     move_servo(27, false, true);
-    LEDpattern1 = LEDpattern1 | LEDArray[9];
+    LEDpattern = LEDpattern ^ LEDArray[9];  
     set_LEDS();
     delay(500);
     break;
@@ -619,8 +634,7 @@ void move_points(int switchNum)
     print_message("Button 20.", false, true);
     print_message("Opening - J ");
     move_servo(27, true, true);
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 9);
+    LEDpattern = LEDpattern | LEDArray[9];   
     set_LEDS();
     delay(500);
     break;
@@ -631,7 +645,7 @@ void move_points(int switchNum)
     print_message("Closing - k");
     move_servo(0, false, true);
     move_servo(1, false, true);
-    LEDpattern1 = LEDpattern1 | LEDArray[10];
+    LEDpattern = LEDpattern ^ LEDArray[10]; 
     set_LEDS();
     delay(500);
     break;
@@ -642,8 +656,7 @@ void move_points(int switchNum)
     print_message("Opening - k ");
     move_servo(0, true, true);
     move_servo(1, true, true);
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 10);
+    LEDpattern = LEDpattern | LEDArray[10];    
     set_LEDS();
     delay(500);
     break;
@@ -653,7 +666,7 @@ void move_points(int switchNum)
     print_message("Button 22.", false, true);
     print_message("Closing - L");
     move_servo(3, false, true);
-    LEDpattern1 = LEDpattern1 | LEDArray[11];
+    LEDpattern = LEDpattern ^ LEDArray[11]; 
     set_LEDS();
 
     delay(500);
@@ -664,8 +677,7 @@ void move_points(int switchNum)
     print_message("Button 23.", false, true);
     print_message("Opening - L ");
     move_servo(3, true, true);
-    tempVal = LEDpattern1;
-    LEDpattern1 = bitClear(tempVal, 11);
+    LEDpattern = LEDpattern | LEDArray[11];    
     set_LEDS();
     delay(500);
     break;
