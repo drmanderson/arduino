@@ -132,7 +132,6 @@ void move_servo(int srv, bool open, bool off, bool init = false)
       {
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
-        delay(30);
       }
     }
     else if (servo[srv].currangle > ang)
@@ -142,7 +141,6 @@ void move_servo(int srv, bool open, bool off, bool init = false)
         // Serial.println(i);
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
-        delay(30);
       }
     }
     set_relay(srv, open);
@@ -186,8 +184,10 @@ void setup()
   pinMode(latchPinS, OUTPUT);
   pinMode(clockPinS, OUTPUT);
   pinMode(dataPinS, OUTPUT);
+  digitalWrite(OEPinS, HIGH);
   pinMode(OEPinS, OUTPUT);
-  digitalWrite(OEPinS, LOW);
+
+
 
   // initialise the 74HC595 with all LED off 0b0000000000000000
   LEDpattern = 0b0000000000000000;
@@ -329,6 +329,9 @@ void setup()
   LEDpattern = 0b0000000000000000;
   set_LEDS();
   delay(500);
+
+  //digitalWrite(OEPinS, LOW);
+  RELAYPattern = 0;
   lcd.print("Setup done.");
   Serial.println("Setup done.");
 }
@@ -346,7 +349,8 @@ void set_LEDS()
 
 void set_relay(int srv, bool open)
 {
-    int temp;
+  digitalWrite(OEPinS, LOW);
+  int temp;
   if (servo[srv].relay == 0)
   {
     return;
@@ -418,7 +422,6 @@ void move_points(int switchNum)
     // move_servo(servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].closeangle );
     LEDpattern = LEDpattern ^ LEDArray[0];
     set_LEDS();
-    delay(500);
     break;
 
   case 1:
@@ -429,7 +432,6 @@ void move_points(int switchNum)
     // move_servo(servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].openangle );
     LEDpattern = LEDpattern | LEDArray[0];
     set_LEDS();
-    delay(500);
     break;
 
   case 2:
@@ -440,7 +442,6 @@ void move_points(int switchNum)
     // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].closeangle );
     LEDpattern = LEDpattern ^ LEDArray[1];
     set_LEDS();
-    delay(500);
     break;
 
   case 3:
@@ -451,7 +452,6 @@ void move_points(int switchNum)
     // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].openangle );
     LEDpattern = LEDpattern | LEDArray[1];
     set_LEDS();
-    delay(500);
     break;
 
   case 4:
@@ -461,7 +461,6 @@ void move_points(int switchNum)
     move_servo(18, false, true); // Close point and turn off servo
     LEDpattern = LEDpattern ^ LEDArray[2];
     set_LEDS();
-    delay(500);
     break;
 
   case 5:
@@ -471,7 +470,6 @@ void move_points(int switchNum)
     move_servo(18, true, true); // open point and turn off servo
     LEDpattern = LEDpattern | LEDArray[2];
     set_LEDS();
-    delay(500);
     break;
 
   case 6:
@@ -482,7 +480,6 @@ void move_points(int switchNum)
     move_servo(19, false, true); // close point and turn off servo
     LEDpattern = LEDpattern ^ LEDArray[3];
     set_LEDS();
-    delay(500);
     break;
 
   case 7:
@@ -493,7 +490,6 @@ void move_points(int switchNum)
     move_servo(19, true, true); // open point and turn off servo
     LEDpattern = LEDpattern | LEDArray[3];
     set_LEDS();
-    delay(500);
     break;
 
   case 8:
@@ -504,7 +500,6 @@ void move_points(int switchNum)
     move_servo(21, false, true); // Close point and turn off servo
     LEDpattern = LEDpattern ^ LEDArray[4];
     set_LEDS();
-    delay(500);
     break;
 
   case 9:
@@ -515,7 +510,6 @@ void move_points(int switchNum)
     LEDpattern = LEDpattern | LEDArray[4];
     set_LEDS();
     print_message("Opening - E ");
-    delay(500);
     break;
 
   case 10:
@@ -526,7 +520,6 @@ void move_points(int switchNum)
     move_servo(23, false, true);
     LEDpattern = LEDpattern ^ LEDArray[5];    
     set_LEDS();
-    delay(500);
     break;
 
   case 11:
@@ -537,7 +530,6 @@ void move_points(int switchNum)
     move_servo(23, true, true);
     LEDpattern = LEDpattern | LEDArray[5];
     set_LEDS();
-    delay(500);
     break;
 
   case 12:
@@ -547,7 +539,6 @@ void move_points(int switchNum)
     move_servo(24, false, true);
     LEDpattern = LEDpattern ^ LEDArray[6];    
     set_LEDS();
-    delay(500);
     break;
 
   case 13:
@@ -557,7 +548,6 @@ void move_points(int switchNum)
     move_servo(24, true, true);
     LEDpattern = LEDpattern | LEDArray[6];
     set_LEDS();
-    delay(500);
     break;
 
   case 14:
@@ -567,7 +557,6 @@ void move_points(int switchNum)
     move_servo(25, false, true);
     LEDpattern = LEDpattern ^LEDArray[7];   
     set_LEDS();
-    delay(500);
     break;
 
   case 15:
@@ -577,7 +566,6 @@ void move_points(int switchNum)
     move_servo(25, true, true);
     LEDpattern = LEDpattern | LEDArray[7];
     set_LEDS();
-    delay(500);
     break;
 
   case 16:
@@ -587,7 +575,6 @@ void move_points(int switchNum)
     move_servo(26, false, true);
     LEDpattern = LEDpattern ^ LEDArray[8]; 
     set_LEDS();
-    delay(500);
     break;
 
   case 17:
@@ -597,7 +584,6 @@ void move_points(int switchNum)
     move_servo(26, true, true);
     LEDpattern = LEDpattern | LEDArray[8];    
     set_LEDS();
-    delay(500);
     break;
 
   case 18:
@@ -607,7 +593,6 @@ void move_points(int switchNum)
     move_servo(27, false, true);
     LEDpattern = LEDpattern ^ LEDArray[9];  
     set_LEDS();
-    delay(500);
     break;
 
   case 19:
@@ -617,7 +602,6 @@ void move_points(int switchNum)
     move_servo(27, true, true);
     LEDpattern = LEDpattern | LEDArray[9];   
     set_LEDS();
-    delay(500);
     break;
 
   case 20:
@@ -628,7 +612,6 @@ void move_points(int switchNum)
     move_servo(1, false, true);
     LEDpattern = LEDpattern ^ LEDArray[10]; 
     set_LEDS();
-    delay(500);
     break;
 
   case 21:
@@ -639,7 +622,6 @@ void move_points(int switchNum)
     move_servo(1, true, true);
     LEDpattern = LEDpattern | LEDArray[10];    
     set_LEDS();
-    delay(500);
     break;
 
   case 22:
@@ -649,8 +631,6 @@ void move_points(int switchNum)
     move_servo(3, false, true);
     LEDpattern = LEDpattern ^ LEDArray[11]; 
     set_LEDS();
-
-    delay(500);
     break;
 
   case 23:
@@ -660,7 +640,6 @@ void move_points(int switchNum)
     move_servo(3, true, true);
     LEDpattern = LEDpattern | LEDArray[11];    
     set_LEDS();
-    delay(500);
     break;
   default:
     // default - it's broken
