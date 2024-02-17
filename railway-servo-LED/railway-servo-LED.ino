@@ -97,16 +97,14 @@ void move_servo(int srv, bool open, bool off, bool init = false)
   // Are we initialising - init=true
   if (init)
   {
-    // Serial.println("init");
+    Serial.println("init");
     //  currangle is not valid. Close  points and set currangle to closeangle
     pulselength = map(servo[srv].closeangle, 0, 180, SERVOMIN, SERVOMAX); // map angle of 0 to 180 to Servo min and Servo max
     servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
-    if (off)
-    { // There's no real load on the servo so we can disable it after it's moved. Saves a bit of power and stops it hunting
-      servo[srv].pwmcard.setPWM(srv, 0, 4096);
-    }
     servo[srv].currangle = servo[srv].closeangle;
-    // Serial.println(servo[srv].currangle);
+    Serial.println(servo[srv].currangle);
+    // There's no real load on the servo so we can disable it after it's moved. Saves a bit of power and stops it hunting
+    servo[srv].pwmcard.setPWM(srv, 0, 4096);
   }
   else // OK - not initializing - system is up and running - we're opening or closing a point
   {
@@ -131,9 +129,11 @@ void move_servo(int srv, bool open, bool off, bool init = false)
       for (int i = servo[srv].currangle; i < ang; i++)
       {
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
-        Serial.println(i);
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
+        delay(40);
       }
+      Serial.println("off");
+      servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, 4096);
     }
     else if (servo[srv].currangle > ang)
     {
@@ -141,9 +141,11 @@ void move_servo(int srv, bool open, bool off, bool init = false)
       {
         // Serial.println(i);
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
-        Serial.println(i);
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
+        delay(30);
       }
+        Serial.println("off");
+        servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, 4096); 
     }
     set_relay(srv, open);
     servo[srv].currangle = ang;
@@ -314,7 +316,7 @@ void setup()
       Serial.println(i);
       // move_servo(servo[i].pwmcard_socket, false, true, true);
       move_servo(i, false, true, true);
-      delay(100);
+      delay(1000);
     }
   }
   Serial.println("Flashing Leds");
