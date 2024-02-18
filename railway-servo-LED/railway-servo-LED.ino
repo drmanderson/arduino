@@ -50,10 +50,10 @@ const int OEPinS = 8;    // Connects to OE pin of the 595 (13)
 const int readyLED = 2;
 
 long LEDpattern; // LED Pattern to send to the 74HC595 chips
-long tempVal;
-long LEDArray[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 ,32768 };
+int tempVal;
+const int LEDArray[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 ,32768 };
 long RELAYPattern = 0;
-long relayArray[8] = {1, 2, 4, 8, 16, 32, 64, 128};
+const int relayArray[8] = {1, 2, 4, 8, 16, 32, 64, 128};
 // Setup initial values
 BYTES_VAL_T pinValues = 0;    // new values from  74HC165 chips
 BYTES_VAL_T oldPinValues = 0; // old values from  74HC165 chips
