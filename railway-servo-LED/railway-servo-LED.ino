@@ -24,7 +24,7 @@ struct ServoData
   byte pwmcard_socket;             // Socket on PCA9685 card
   byte openangle;                  // User Configurable servo angle for open point
   byte closeangle;                 // User Configurable servo angle for close point
-  int relay = 0;                   // Is a relay needed for FROG switching
+  byte relay = 0;                   // Is a relay needed for FROG switching
   byte currangle = 90;                  // Current angle - used for slow sweep
 };
 
@@ -51,7 +51,7 @@ const int readyLED = 2;
 
 long LEDpattern; // LED Pattern to send to the 74HC595 chips
 int tempVal;
-const int LEDArray[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 ,32768 };
+const int LEDArray[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 , 32768};
 long RELAYPattern = 0;
 const int relayArray[8] = {1, 2, 4, 8, 16, 32, 64, 128};
 // Setup initial values
@@ -74,7 +74,7 @@ BYTES_VAL_T read_values()
   // Get data from 74HC165 chips
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, INPUT);
-  for (int i = 0; i < DATA_WIDTH; i++)
+  for (byte i = 0; i < DATA_WIDTH; i++)
   {
     // Read value in
     bitVal = digitalRead(dataPin);
@@ -90,26 +90,25 @@ BYTES_VAL_T read_values()
   return (bytesVal);
 }
 
-void move_servo(int srv, bool open, bool off, bool init = false)
+void print_message(String message, bool lcdout = true, bool serialout = true)
+{
+  if (serialout)
+  {
+    Serial.println(message);
+  }
+  if (lcdout)
+  {
+    lcd.clear();
+    lcd.home();
+    lcd.print(message);
+  }
+}
+
+void move_servo(byte srv, bool open, bool off)
 {
   byte ang = 90; // 90 is a safe agnle to set to if something is borked
   byte pulselength = 0;
-  // Are we initialising - init=true
-  if (init)
-  {
-    Serial.println("init");
-    //  currangle is not valid. Close  points and set currangle to closeangle
-    pulselength = map(servo[srv].openangle, 0, 180, SERVOMIN, SERVOMAX);
-    servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
-    pulselength = map(servo[srv].closeangle, 0, 180, SERVOMIN, SERVOMAX); // map angle of 0 to 180 to Servo min and Servo max
-    servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
-    servo[srv].currangle = servo[srv].closeangle;
-    Serial.println(servo[srv].currangle);
-    // There's no real load on the servo so we can disable it after it's moved. Saves a bit of power and stops it hunting
-    servo[srv].pwmcard.setPWM(srv, 0, 4096);
-  }
-  else // OK - not initializing - system is up and running - we're opening or closing a point
-  {
+
     if (open)
     { // We want to open the point
       ang = servo[srv].openangle;
@@ -121,6 +120,9 @@ void move_servo(int srv, bool open, bool off, bool init = false)
     //
     // We've figured out open and close settings now to move servos and set relays
     //
+    Serial.print("Cur angle : ");
+    Serial.print(servo[srv].currangle);
+    Serial.print(" ");
     if (servo[srv].currangle == ang)
     {
       Serial.println("No change");
@@ -128,7 +130,7 @@ void move_servo(int srv, bool open, bool off, bool init = false)
     }
     else if (ang > servo[srv].currangle)
     {
-      for (int i = servo[srv].currangle; i < ang; i++)
+      for (byte i = servo[srv].currangle; i < ang; i++)
       {
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
@@ -139,7 +141,7 @@ void move_servo(int srv, bool open, bool off, bool init = false)
     }
     else if (servo[srv].currangle > ang)
     {
-      for (int i = servo[srv].currangle; i > ang; i--)
+      for (byte i = servo[srv].currangle; i > ang; i--)
       {
         // Serial.println(i);
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
@@ -151,196 +153,9 @@ void move_servo(int srv, bool open, bool off, bool init = false)
     }
     set_relay(srv, open);
     servo[srv].currangle = ang;
-  }
+    print_message("Ready",true, true);
 }
 
-void setup()
-{
-  // Setup i2c LCD
-  lcd.init();
-  lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Setting up ....");
-  delay(2000);
-  lcd.clear();
-  // Setup Serial Monitor
-  Serial.begin(9600);
-  Serial.println("railway-servo-LED....");
-  Serial.println("Setting up ....");
-
-  // Setup 74HC165 SWITCH Serial connections
-  pinMode(ploadPin, OUTPUT);
-  pinMode(clockEnablePin, OUTPUT);
-  pinMode(clockPin, OUTPUT);
-  pinMode(dataPin, INPUT);
-  // Required initial states of these two pins according to the datasheet timing diagram
-  digitalWrite(clockPin, LOW);
-  digitalWrite(ploadPin, HIGH);
-
-  // Setup 74HC595 LED serial connections
-  pinMode(latchPinOut, OUTPUT);
-  pinMode(clockPinOut, OUTPUT);
-  pinMode(dataPinOut, OUTPUT);
-
-  // Ready LED PIN
-  pinMode(readyLED, OUTPUT);
-
-  // Setup 74HC595 RELAY serial connections
-  pinMode(latchPinS, OUTPUT);
-  pinMode(clockPinS, OUTPUT);
-  pinMode(dataPinS, OUTPUT);
-  digitalWrite(OEPinS, HIGH);
-  pinMode(OEPinS, OUTPUT);
-
-
-
-  // initialise the 74HC595 with all LED off 0b0000000000000000
-  LEDpattern = 0b0000000000000000;
-  set_LEDS();
-
-  // Setup PWM PCA9685 cards
-  pwm.begin();
-  pwm.setPWMFreq(60); // Analog servos run at ~60 Hz updates
-  pwm1.begin();
-  pwm1.setPWMFreq(60); // Analog servos run at ~60 Hz updates
-  pwm2.begin();
-  pwm2.setPWMFreq(60); // Analog servos run at ~60 Hz updates
-
-  // Setup NUMSERVOS servos
-  // Remember to update ths number when new servos are added.
-  servo[0].pwmcard = pwm;
-  servo[0].pwmcard_socket = 0;
-  servo[0].openangle = 145;
-  servo[0].closeangle = 65;
-  servo[0].currangle = servo[0].openangle;
-
-  servo[1].pwmcard = pwm;
-  servo[1].pwmcard_socket = 1;
-  servo[1].openangle = 110;
-  servo[1].closeangle = 60;
-  servo[1].currangle = servo[1].openangle;
-
-  servo[2].pwmcard = pwm;
-  servo[2].pwmcard_socket = 2;
-  servo[2].openangle = 120;
-  servo[2].closeangle = 60;
-  servo[2].currangle = servo[2].openangle;
-
-  servo[3].pwmcard = pwm;
-  servo[3].pwmcard_socket = 3;
-  servo[3].openangle = 125;
-  servo[3].closeangle = 55;
-  servo[3].currangle = servo[3].openangle;
-
-  servo[16].pwmcard = pwm1;
-  servo[16].pwmcard_socket = 0;
-  servo[16].openangle = 130;
-  servo[16].closeangle = 60;
-  servo[16].relay = 1;
-  servo[16].currangle = servo[16].openangle;
-
-  servo[17].pwmcard = pwm1;
-  servo[17].pwmcard_socket = 1;
-  servo[17].openangle = 70;
-  servo[17].closeangle = 130;
-  servo[17].relay = 2;
-  servo[17].currangle = servo[17].openangle;
-
-  servo[18].pwmcard = pwm1;
-  servo[18].pwmcard_socket = 2;
-  servo[18].openangle = 60;
-  servo[18].closeangle = 120;
-  servo[18].relay = 3;  
-  servo[18].currangle = servo[18].openangle;
-
-  servo[19].pwmcard = pwm1;
-  servo[19].pwmcard_socket = 3;
-  servo[19].openangle = 135;
-  servo[19].closeangle = 60;
-  servo[19].relay = 4;  
-  servo[19].currangle = servo[19].openangle;
-
-  servo[20].pwmcard = pwm1;
-  servo[20].pwmcard_socket = 4;
-  servo[20].openangle = 60;
-  servo[20].closeangle = 120;
-  servo[20].currangle = servo[20].openangle;
-
-  servo[21].pwmcard = pwm1;
-  servo[21].pwmcard_socket = 5;
-  servo[21].openangle = 120;
-  servo[21].closeangle = 60;
-  servo[21].currangle = servo[21].openangle;
-
-  servo[22].pwmcard = pwm1;
-  servo[22].pwmcard_socket = 6;
-  servo[22].openangle = 65;
-  servo[22].closeangle = 130;
-  servo[22].currangle = servo[22].openangle;
-
-  servo[23].pwmcard = pwm1;
-  servo[23].pwmcard_socket = 7;
-  servo[23].openangle = 65;
-  servo[23].closeangle = 135;
-  servo[23].currangle = servo[23].openangle;
-
-  servo[24].pwmcard = pwm1;
-  servo[24].pwmcard_socket = 8;
-  servo[24].openangle = 130;
-  servo[24].closeangle = 60;
-  servo[24].currangle = servo[24].openangle;
-
-  servo[25].pwmcard = pwm1;
-  servo[25].pwmcard_socket = 9;
-  servo[25].openangle = 120;
-  servo[25].closeangle = 70;
-  servo[25].currangle = servo[25].openangle;
-
-  servo[26].pwmcard = pwm1;
-  servo[26].pwmcard_socket = 10;
-  servo[26].openangle = 140;
-  servo[26].closeangle = 60;
-  servo[26].currangle = servo[26].openangle;
-
-  servo[27].pwmcard = pwm1;
-  servo[27].pwmcard_socket = 11;
-  servo[27].openangle = 120;
-  servo[27].closeangle = 55;
-  servo[27].currangle = servo[27].openangle;
-
-  // Start board in safe positions with all junctions "closed"
-  for (int i = 0; i <= NUMSERVOS - 1; i++)
-  {
-    if (servo[i].openangle != 0)
-    { // We want to ignore elements not yet filled on the PWM9685 card
-      Serial.print("Closing :");
-      Serial.println(i);
-      // move_servo(servo[i].pwmcard_socket, false, true, true);
-      move_servo(i, false, true, true);
-      delay(1000);
-    }
-  }
-  Serial.println("Flashing Leds");
-  // Flash all the LEDS
-  LEDpattern = 0b1111111111111111;
-  set_LEDS();
-  delay(500);
-  LEDpattern = 0b0000000000000000;
-  set_LEDS();
-  delay(500);
-  LEDpattern = 0b1111111111111111;
-  set_LEDS();
-  delay(500);
-  LEDpattern = 0b0000000000000000;
-  set_LEDS();
-  delay(500);
-
-  //digitalWrite(OEPinS, LOW);
-  RELAYPattern = 0;
-  lcd.print("Setup done.");
-  Serial.println("Setup done.");
-}
 
 void set_LEDS()
 {
@@ -365,31 +180,31 @@ void set_relay(int srv, bool open)
   {
     if (open)
     {
-      Serial.print("    Relay to change ");
-      Serial.print(servo[srv].relay);
-      Serial.print(" ");
-      Serial.print(relayArray[servo[srv].relay]);
+      //Serial.print("    Relay to change ");
+      //Serial.print(servo[srv].relay);
+      //Serial.print(" ");
+      //Serial.print(relayArray[servo[srv].relay]);
       // If there is a relay associated with the point closed if NO so switch off the 74HC595 pin
       temp = (relayArray[(servo[srv].relay - 1)]);
-      Serial.print(" ");
-      Serial.print(temp);
+      //Serial.print(" ");
+      //Serial.print(temp);
       RELAYPattern = RELAYPattern | temp;
-      Serial.print(" ");
-      Serial.println(RELAYPattern);
+      //Serial.print(" ");
+      //Serial.println(RELAYPattern);
     }
     else
     {
-      Serial.print("    Relay to change ");
-      Serial.print(servo[srv].relay);
-      Serial.print(" ");
-      Serial.print(relayArray[servo[srv].relay]);
+      //Serial.print("    Relay to change ");
+      //Serial.print(servo[srv].relay);
+     //Serial.print(" ");
+      //Serial.print(relayArray[servo[srv].relay]);
       // If there is a relay associated with the point closed if NO so switch off the 74HC595 pin
       temp = (relayArray[(servo[srv].relay - 1)]);
-      Serial.print(" ");
-      Serial.print(temp);
+     //Serial.print(" ");
+      //Serial.print(temp);
       RELAYPattern = RELAYPattern ^ temp;
-      Serial.print(" ");
-      Serial.println(RELAYPattern);
+      //Serial.print(" ");
+      //Serial.println(RELAYPattern);
     }
     // ST_CP LOW to keep LEDs from changing while reading serial data
     digitalWrite(latchPinS, LOW);
@@ -400,19 +215,6 @@ void set_relay(int srv, bool open)
   }
 }
 
-void print_message(String message, bool lcdout = true, bool serialout = true)
-{
-  if (serialout)
-  {
-    Serial.println(message);
-  }
-  if (lcdout)
-  {
-    lcd.clear();
-    lcd.home();
-    lcd.print(message);
-  }
-}
 
 void move_points(int switchNum)
 {
@@ -424,7 +226,7 @@ void move_points(int switchNum)
     // Button "1:" - Close juction A
     print_message("Button 1.", false, true);
     print_message("Closing - A");
-    move_servo(16, false, false, false);
+    move_servo(16, false, false);
     // move_servo(servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].closeangle );
     LEDpattern = LEDpattern ^ LEDArray[0];
     set_LEDS();
@@ -434,7 +236,7 @@ void move_points(int switchNum)
     // Button "2" - Open juntion A
     print_message("Button 2.", false, true);
     print_message("Opening - A");
-    move_servo(16, true, false, false); // open point and turn off servo
+    move_servo(16, true, false); // open point and turn off servo
     // move_servo(servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].openangle );
     LEDpattern = LEDpattern | LEDArray[0];
     set_LEDS();
@@ -444,7 +246,7 @@ void move_points(int switchNum)
     // Button "3" - Close Juction B
     print_message("Button 3.", false, true);
     print_message("Closing - B");
-    move_servo(17, false, false, false); // close point and turn off servo
+    move_servo(17, false, false); // close point and turn off servo
     // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].closeangle );
     LEDpattern = LEDpattern ^ LEDArray[1];
     set_LEDS();
@@ -452,9 +254,9 @@ void move_points(int switchNum)
 
   case 3:
     // Button "4" - Open Juction B
-    print_message("Button 4.", false, true);
+    print_message("Button 4.", false);
     print_message("Opening - B");
-    move_servo(17, true, false, false); // open point and turn off servo
+    move_servo(17, true, false); // open point and turn off servo
     // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].openangle );
     LEDpattern = LEDpattern | LEDArray[1];
     set_LEDS();
@@ -655,6 +457,217 @@ void move_points(int switchNum)
     print_message("Failure...");
     break;
   }
+}
+
+void setup()
+{
+  // Setup i2c LCD
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Setting up ....");
+  delay(2000);
+  lcd.clear();
+  // Setup Serial Monitor
+  Serial.begin(9600);
+  Serial.println("railway-servo-LED....");
+  Serial.println("Setting up ....");
+
+  // Setup 74HC165 SWITCH Serial connections
+  pinMode(ploadPin, OUTPUT);
+  pinMode(clockEnablePin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+  pinMode(dataPin, INPUT);
+  // Required initial states of these two pins according to the datasheet timing diagram
+  digitalWrite(clockPin, LOW);
+  digitalWrite(ploadPin, HIGH);
+
+  // Setup 74HC595 LED serial connections
+  pinMode(latchPinOut, OUTPUT);
+  pinMode(clockPinOut, OUTPUT);
+  pinMode(dataPinOut, OUTPUT);
+
+  // Ready LED PIN
+  pinMode(readyLED, OUTPUT);
+
+  // Setup 74HC595 RELAY serial connections
+  pinMode(latchPinS, OUTPUT);
+  pinMode(clockPinS, OUTPUT);
+  pinMode(dataPinS, OUTPUT);
+  digitalWrite(OEPinS, HIGH);
+  pinMode(OEPinS, OUTPUT);
+
+
+
+  // initialise the 74HC595 with all LED off 0b0000000000000000
+  LEDpattern = 0b0000000000000000;
+  set_LEDS();
+
+  // Setup PWM PCA9685 cards
+  pwm.begin();
+  pwm.setPWMFreq(60); // Analog servos run at ~60 Hz updates
+  pwm1.begin();
+  pwm1.setPWMFreq(60); // Analog servos run at ~60 Hz updates
+  pwm2.begin();
+  pwm2.setPWMFreq(60); // Analog servos run at ~60 Hz updates
+
+  // Setup NUMSERVOS servos
+  // Remember to update ths number when new servos are added.
+  servo[0].pwmcard = pwm;
+  servo[0].pwmcard_socket = 0;
+  servo[0].openangle = 145;
+  servo[0].closeangle = 65;
+  servo[0].currangle = servo[0].openangle;
+
+  servo[1].pwmcard = pwm;
+  servo[1].pwmcard_socket = 1;
+  servo[1].openangle = 110;
+  servo[1].closeangle = 60;
+  servo[1].currangle = servo[1].openangle;
+
+  servo[2].pwmcard = pwm;
+  servo[2].pwmcard_socket = 2;
+  servo[2].openangle = 120;
+  servo[2].closeangle = 60;
+  servo[2].currangle = servo[2].openangle;
+
+  servo[3].pwmcard = pwm;
+  servo[3].pwmcard_socket = 3;
+  servo[3].openangle = 125;
+  servo[3].closeangle = 55;
+  servo[3].currangle = servo[3].openangle;
+
+  servo[16].pwmcard = pwm1;
+  servo[16].pwmcard_socket = 0;
+  servo[16].openangle = 130;
+  servo[16].closeangle = 60;
+  servo[16].relay = 1;
+  servo[16].currangle = servo[16].openangle;
+
+  servo[17].pwmcard = pwm1;
+  servo[17].pwmcard_socket = 1;
+  servo[17].openangle = 70;
+  servo[17].closeangle = 130;
+  servo[17].relay = 2;
+  servo[17].currangle = servo[17].openangle;
+
+  servo[18].pwmcard = pwm1;
+  servo[18].pwmcard_socket = 2;
+  servo[18].openangle = 60;
+  servo[18].closeangle = 120;
+  servo[18].relay = 3;  
+  servo[18].currangle = servo[18].openangle;
+
+  servo[19].pwmcard = pwm1;
+  servo[19].pwmcard_socket = 3;
+  servo[19].openangle = 135;
+  servo[19].closeangle = 60;
+  servo[19].relay = 4;  
+  servo[19].currangle = servo[19].openangle;
+
+  servo[20].pwmcard = pwm1;
+  servo[20].pwmcard_socket = 4;
+  servo[20].openangle = 60;
+  servo[20].closeangle = 120;
+  servo[20].currangle = servo[20].openangle;
+
+  servo[21].pwmcard = pwm1;
+  servo[21].pwmcard_socket = 5;
+  servo[21].openangle = 120;
+  servo[21].closeangle = 60;
+  servo[21].currangle = servo[21].openangle;
+
+  servo[22].pwmcard = pwm1;
+  servo[22].pwmcard_socket = 6;
+  servo[22].openangle = 65;
+  servo[22].closeangle = 130;
+  servo[22].currangle = servo[22].openangle;
+
+  servo[23].pwmcard = pwm1;
+  servo[23].pwmcard_socket = 7;
+  servo[23].openangle = 65;
+  servo[23].closeangle = 135;
+  servo[23].currangle = servo[23].openangle;
+
+  servo[24].pwmcard = pwm1;
+  servo[24].pwmcard_socket = 8;
+  servo[24].openangle = 130;
+  servo[24].closeangle = 60;
+  servo[24].currangle = servo[24].openangle;
+
+  servo[25].pwmcard = pwm1;
+  servo[25].pwmcard_socket = 9;
+  servo[25].openangle = 120;
+  servo[25].closeangle = 70;
+  servo[25].currangle = servo[25].openangle;
+
+  servo[26].pwmcard = pwm1;
+  servo[26].pwmcard_socket = 10;
+  servo[26].openangle = 140;
+  servo[26].closeangle = 60;
+  servo[26].currangle = servo[26].openangle;
+
+  servo[27].pwmcard = pwm1;
+  servo[27].pwmcard_socket = 11;
+  servo[27].openangle = 120;
+  servo[27].closeangle = 55;
+  servo[27].currangle = servo[27].openangle;
+
+  // Start board in safe positions with all junctions "closed"
+  int pulselength=0;
+  for (byte i = 0; i <= NUMSERVOS - 1; i++) {  
+    if (servo[i].openangle != 0) {
+      byte srv=i;
+      String message ("Init : ");
+      message = message + srv;
+      // Serial.print("init : ");
+      // Serial.println(srv);
+      // Serial.print("     Cur : ");
+      // Serial.println(servo[srv].currangle);
+      // //  currangle is not valid. Close  points and set currangle to closeangle
+      // Serial.print("     Open : ");
+      // pulselength = map(servo[srv].openangle, 0, 180, SERVOMIN, SERVOMAX);
+      // Serial.prbyteln(pulselength);
+      // servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
+      // Serial.println(servo[srv].openangle);
+      // delay(400);
+
+      // Serial.print("     Close : ");
+      pulselength = map(servo[srv].closeangle, 0, 180, SERVOMIN, SERVOMAX);  // map angle of 0 to 180 to Servo min and Servo max
+      // Serial.println(pulselength);
+      servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
+      servo[srv].currangle = servo[srv].closeangle;
+      delay(400);
+
+      // Serial.println(servo[srv].closeangle);
+      // Serial.print("     Cur : ");
+      //Serial.println(servo[srv].currangle);
+      // There's no real load on the servo so we can disable it after it's moved. Saves a bit of power and stops it hunting
+      // Serial.println("     OFF");
+      servo[srv].pwmcard.setPWM(srv, 0, 4096);
+      print_message(message, true, true);
+    }
+  }
+  print_message("Flashing LEDS", true, true);
+  // Flash all the LEDS
+  LEDpattern = 0b1111111111111111;
+  set_LEDS();
+  delay(500);
+  LEDpattern = 0b0000000000000000;
+  set_LEDS();
+  delay(500);
+  LEDpattern = 0b1111111111111111;
+  set_LEDS();
+  delay(500);
+  LEDpattern = 0b0000000000000000;
+  set_LEDS();
+  delay(500);
+
+  //digitalWrite(OEPinS, LOW);
+  RELAYPattern = 0;
+  print_message("Setup Done", true, true);
+  print_message("Ready.....", true, true);
 }
 
 void loop()
