@@ -99,6 +99,8 @@ void move_servo(int srv, bool open, bool off, bool init = false)
   {
     Serial.println("init");
     //  currangle is not valid. Close  points and set currangle to closeangle
+    pulselength = map(servo[srv].openangle, 0, 180, SERVOMIN, SERVOMAX);
+    servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
     pulselength = map(servo[srv].closeangle, 0, 180, SERVOMIN, SERVOMAX); // map angle of 0 to 180 to Servo min and Servo max
     servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
     servo[srv].currangle = servo[srv].closeangle;
