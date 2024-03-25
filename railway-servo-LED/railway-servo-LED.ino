@@ -14,7 +14,7 @@ Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42);
 #define SERVOMIN 125 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX 575 // this is the 'maximum' pulse length count (out of 4096)
 #define BYTES_VAL_T unsigned long
-#define NUMBER_OF_CHIPS 4
+#define NUMBER_OF_CHIPS 2
 #define DATA_WIDTH NUMBER_OF_CHIPS * 8
 
 // Setup servo struct that holds pwm card, socket number and open/close angles.
@@ -31,21 +31,22 @@ struct ServoData
 ServoData servo[NUMSERVOS] ;
 
 // 74HC165 pins
-const int clockEnablePin = 4; // Connects to Clock Enable pin the 165 (15)
-const int dataPin = 5;        // Connects to the Q7 pin the 165 (9)
-const int clockPin = 6;       // Connects to the Clock pin the 165 (2)
-const int ploadPin = 7;       // Connects to Parallel load pin the 165 (1)
-
+const int clockEnablePin = 9; // Connects to Clock Enable pin the 165 (15)
+const int dataPin = 10;       // Connects to the Q7 pin the 165 (9)
+const int clockPin = 11;      // Connects to the Clock pin the 165 (2)
+const int ploadPin = 12;      // Connects to Parallel load pin the 165 (1)
+2.
 // 74HC595 LED pins
-const int latchPinOut = 9;  // Connects to the RCLK pin of the 595 (12)  ST_CP
-const int clockPinOut = 10; // Connects to the SRCLK ping of the 595 (11) SH_CP
-const int dataPinOut = 11;  // Connects to the SER pin of the 595 (14) DS
+const int OEPinOut = 4;       // Connects to the OE pin of the 595 (13) OE
+const int latchPinOut = 5;    // Connects to the RCLK pin of the 595 (12)  ST_CP
+const int clockPinOut = 6;    // Connects to the SRCLK ping of the 595 (11) SH_CP
+const int dataPinOut = 7;     // Connects to the SER pin of the 595 (14) DS
 
 // 74HC595 RELAY pins
-const int latchPinS = 16; // Connects to the RCLK pin of the 595 (12)  ST_CP
-const int clockPinS = 17; // Connects to the SRCLK ping of the 595 (11) SH_CP
-const int dataPinS = 15;  // Connects to the SER pin of the 595 (14) DS
-const int OEPinS = 8;    // Connects to OE pin of the 595 (13)
+const int latchPinS = 16;     // Connects to the RCLK pin of the 595 (12)  ST_CP
+const int clockPinS = 17;     // Connects to the SRCLK ping of the 595 (11) SH_CP
+const int dataPinS = 15;      // Connects to the SER pin of the 595 (14) DS
+const int OEPinS = 14;        // Connects to OE pin of the 595 (13)
 
 const int readyLED = 2;
 
@@ -156,12 +157,12 @@ void move_servo(byte srv, bool open, bool off)
     print_message("Ready",true, true);
 }
 
-
 void set_LEDS()
 {
   // Serial.print("LEDpattern... ");
   // Serial.println(LEDpattern);
   // Set the LEDS that are on / off
+  digitalWrite(OEPinOut, LOW);
   digitalWrite(latchPinOut, LOW);
   shiftOut(dataPinOut, clockPinOut, LSBFIRST, LEDpattern);
   shiftOut(dataPinOut, clockPinOut, LSBFIRST, (LEDpattern >> 8));
@@ -214,7 +215,6 @@ void set_relay(int srv, bool open)
     digitalWrite(latchPinS, HIGH);
   }
 }
-
 
 void move_points(int switchNum)
 {
@@ -487,6 +487,8 @@ void setup()
   pinMode(latchPinOut, OUTPUT);
   pinMode(clockPinOut, OUTPUT);
   pinMode(dataPinOut, OUTPUT);
+  digitalWrite(OEPinOut, HIGH);
+  pinMode(OEPinOut, OUTPUT);
 
   // Ready LED PIN
   pinMode(readyLED, OUTPUT);
