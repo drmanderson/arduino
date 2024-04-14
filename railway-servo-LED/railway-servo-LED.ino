@@ -14,7 +14,7 @@ Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42);
 #define SERVOMIN 125 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX 575 // this is the 'maximum' pulse length count (out of 4096)
 #define BYTES_VAL_T unsigned long
-#define NUMBER_OF_CHIPS 2
+#define NUMBER_OF_CHIPS 4
 #define DATA_WIDTH NUMBER_OF_CHIPS * 8
 
 // Setup servo struct that holds pwm card, socket number and open/close angles.
@@ -35,7 +35,7 @@ const int clockEnablePin = 9; // Connects to Clock Enable pin the 165 (15)
 const int dataPin = 10;       // Connects to the Q7 pin the 165 (9)
 const int clockPin = 11;      // Connects to the Clock pin the 165 (2)
 const int ploadPin = 12;      // Connects to Parallel load pin the 165 (1)
-2.
+
 // 74HC595 LED pins
 const int OEPinOut = 4;       // Connects to the OE pin of the 595 (13) OE
 const int latchPinOut = 5;    // Connects to the RCLK pin of the 595 (12)  ST_CP
@@ -52,7 +52,7 @@ const int readyLED = 2;
 
 long LEDpattern; // LED Pattern to send to the 74HC595 chips
 int tempVal;
-const int LEDArray[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 , 32768};
+const long int LEDArray[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 , 32768};
 long RELAYPattern = 0;
 const int relayArray[8] = {1, 2, 4, 8, 16, 32, 64, 128};
 // Setup initial values
