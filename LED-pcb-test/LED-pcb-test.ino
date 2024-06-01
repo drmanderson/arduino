@@ -7,16 +7,16 @@ const int OEPinOut = 4;        // Connects to OE pin of the 595 (13)
 
 const int readyLED = 2;
 
-int RELAYPattern = 0;
+int LEDPattern = 0;
 
 
 
-void set_RELAYS()
+void set_LEDS()
 {
   digitalWrite(OEPinOut, LOW);
   digitalWrite(latchPinOut, LOW);
-  shiftOut(dataPinOut, clockPinOut, LSBFIRST, RELAYPattern);
- // shiftOut(dataPinOut, clockPinOut, LSBFIRST, (RELAYPattern >> 8));
+  shiftOut(dataPinOut, clockPinOut, LSBFIRST, LEDPattern);
+  shiftOut(dataPinOut, clockPinOut, LSBFIRST, (LEDPattern >> 8));
   digitalWrite(latchPinOut, HIGH);
 }
 
@@ -44,15 +44,15 @@ void loop()
 
   // Light readyLED
   digitalWrite(readyLED, HIGH);
-  //RELAYPattern = 0b1111111111111111;
-  RELAYPattern = 0b11111111;
-  set_RELAYS();
+  LEDPattern = 0b1111111111111111;
+  //LEDPattern = 0b11111111;
+  set_LEDS();
   Serial.println("On");
   delay (1000);
   digitalWrite(readyLED, LOW);
-  //RELAYPattern = 0b0000000000000000;
-  RELAYPattern = 0b00000000;
-  set_RELAYS();
+  LEDPattern = 0b0000000000000000;
+  //LEDPattern = 0b00000000;
+  set_LEDS();
   Serial.println("off");
   delay (1000);
 

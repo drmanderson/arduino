@@ -19,7 +19,7 @@ void set_RELAYS()
   digitalWrite(OEPinS, LOW);
   digitalWrite(latchPinS, LOW);
   shiftOut(dataPinS, clockPinS, LSBFIRST, RELAYPattern);
-  shiftOut(dataPinS, clockPinS, LSBFIRST, (RELAYPattern >> 8));
+  //shiftOut(dataPinS, clockPinS, LSBFIRST, (RELAYPattern >> 8));
    digitalWrite(latchPinS, HIGH);
 }
 
@@ -47,12 +47,14 @@ void loop()
 
   // Light readyLED
   digitalWrite(readyLED, HIGH);
-  RELAYPattern = 0b1111111111111111;
+  RELAYPattern = 7;
+  Serial.println(RELAYPattern);
   set_RELAYS();
   Serial.println("On");
   delay (1000);
   digitalWrite(readyLED, LOW);
-  RELAYPattern = 0b0000000000000000;
+  RELAYPattern = 0;
+  Serial.println(RELAYPattern);
   set_RELAYS();
   Serial.println("off");
   delay (1000);

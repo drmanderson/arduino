@@ -161,60 +161,67 @@ void move_servo(byte srv, bool open, bool off)
 
 void set_LEDS()
 {
-  // Serial.print("LEDpattern... ");
-  // Serial.println(LEDpattern);
+  Serial.print("LEDpattern... ");
+  Serial.println(LEDpattern);
   // Set the LEDS that are on / off
   digitalWrite(OEPinOut, LOW);
   digitalWrite(latchPinOut, LOW);
-  shiftOut(dataPinOut, clockPinOut, LSBFIRST, LEDpattern);
-  shiftOut(dataPinOut, clockPinOut, LSBFIRST, (LEDpattern >> 8));
+  shiftOut(dataPinOut, clockPinOut, MSBFIRST, LEDpattern);
+  shiftOut(dataPinOut, clockPinOut, MSBFIRST````  , (LEDpattern >> 8));
   digitalWrite(latchPinOut, HIGH);
 }
 
 void set_relay(int srv, bool open)
 {
-  
-  digitalWrite(OEPinS, LOW);
   int temp;
   if (servo[srv].relay == 0)
   {
+    Serial.println("No Servo configuration");
     return;
   }
   else
   {
     if (open)
     {
-      Serial.print("    Relay to change ");
+      Serial.print("    Open: Relay to change ");
       Serial.print(srv);
       Serial.print(" ");
-      Serial.print(relayArray[servo[srv].relay]);
-      // If there is a relay associated with the point closed if NO so switch off the 74HC595 pin
-      temp = (relayArray[(servo[srv].relay - 1)]);
+      Serial.print(servo[srv].relay);
       Serial.print(" ");
-      Serial.print(temp);
+      Serial.print((servo[srv].relay)-1);      
+      // If there is a relay associated with the point closed if NO so switch off the 74HC595 pin
+      temp = (relayArray[(servo[srv].relay) - 1]);
+      Serial.print(" ");
+      Serial.print(temp,BIN);
+      Serial.print(" ");
+      Serial.print(RELAYPattern,BIN);      
       RELAYPattern = RELAYPattern | temp;
       Serial.print(" ");
-      Serial.println(RELAYPattern);
+      Serial.println(RELAYPattern,BIN);
     }
     else
     {
-      Serial.print("    Relay to change ");
+      Serial.print("    Close: Relay to change ");
+      Serial.print(srv);
+      Serial.print(" ");
       Serial.print(servo[srv].relay);
       Serial.print(" ");
-      Serial.print(relayArray[servo[srv].relay]);
+      Serial.print((servo[srv].relay)-1);  
       // If there is a relay associated with the point closed if NO so switch off the 74HC595 pin
-      temp = (relayArray[(servo[srv].relay - 1)]);
+      temp = (relayArray[(servo[srv].relay) - 1]);
       Serial.print(" ");
-      Serial.print(temp);
+      Serial.print(temp,BIN);
+      Serial.print(" ");
+      Serial.print(RELAYPattern,BIN);  
       RELAYPattern = RELAYPattern ^ temp;
       Serial.print(" ");
-      Serial.println(RELAYPattern);
+      Serial.println(RELAYPattern,BIN);
     }
     // ST_CP LOW to keep LEDs from changing while reading serial data
-    Serial.println("set relay chip");
+    Serial.println("    set relay chip");
     digitalWrite(latchPinS, LOW);
     // Shift out the bits
-    shiftOut(dataPinS, clockPinS, LSBFIRST, RELAYPattern);
+    shiftOut(dataPinS, clockPinS, MSBFIRST, RELAYPattern);
     // ST_CP HIGH change LEDs
     digitalWrite(latchPinS, HIGH);
   }
@@ -671,7 +678,8 @@ void setup()
   delay(500);
 
   //digitalWrite(OEPinS, LOW);
-  RELAYPattern = 0;
+  RELAYPattern = 0B00000000;
+  digitalWrite(OEPinS, LOW);
   print_message("Setup Done", true, true);
   print_message("Ready.....", true, true);
 }
