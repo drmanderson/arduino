@@ -161,13 +161,13 @@ void move_servo(byte srv, bool open, bool off)
 
 void set_LEDS()
 {
-  Serial.print("LEDpattern... ");
+  Serial.print("set_LEDS:   LEDpattern... ");
   Serial.println(LEDpattern);
   // Set the LEDS that are on / off
   digitalWrite(OEPinOut, LOW);
   digitalWrite(latchPinOut, LOW);
   shiftOut(dataPinOut, clockPinOut, MSBFIRST, LEDpattern);
-  shiftOut(dataPinOut, clockPinOut, MSBFIRST````  , (LEDpattern >> 8));
+  shiftOut(dataPinOut, clockPinOut, MSBFIRST, (LEDpattern >> 8));
   digitalWrite(latchPinOut, HIGH);
 }
 
@@ -239,7 +239,7 @@ void move_points(int switchNum)
     print_message("Closing - A");
     move_servo(16, false, false);
     // move_servo(servo[16].pwmcard, servo[16].pwmcard_socket, servo[16].closeangle );
-    LEDpattern = LEDpattern ^ LEDArray[0];
+    LEDpattern = LEDpattern & ~LEDArray[0];
     set_LEDS();
     break;
 
@@ -259,7 +259,7 @@ void move_points(int switchNum)
     print_message("Closing - B");
     move_servo(17, false, false); // close point and turn off servo
     // move_servo(servo[17].pwmcard, servo[17].pwmcard_socket, servo[17].closeangle );
-    LEDpattern = LEDpattern ^ LEDArray[1];
+    LEDpattern = LEDpattern & ~LEDArray[1];
     set_LEDS();
     break;
 
@@ -278,7 +278,7 @@ void move_points(int switchNum)
     print_message("Button 5.", false, true);
     print_message("Closing - C ");
     move_servo(18, false, true); // Close point and turn off servo
-    LEDpattern = LEDpattern ^ LEDArray[2];
+    LEDpattern = LEDpattern & ~LEDArray[2];
     set_LEDS();
     break;
 
@@ -297,7 +297,7 @@ void move_points(int switchNum)
     print_message("Closing - D ");
     move_servo(2, false, true);  // close point and turn off servo
     move_servo(19, false, true); // close point and turn off servo
-    LEDpattern = LEDpattern ^ LEDArray[3];
+    LEDpattern = LEDpattern & ~LEDArray[3];
     set_LEDS();
     break;
 
@@ -317,7 +317,7 @@ void move_points(int switchNum)
     print_message("Closing - E");
     move_servo(20, false, true); // Close point and turn off servo
     move_servo(21, false, true); // Close point and turn off servo
-    LEDpattern = LEDpattern ^ LEDArray[4];
+    LEDpattern = LEDpattern & ~LEDArray[4];
     set_LEDS();
     break;
 
@@ -337,7 +337,7 @@ void move_points(int switchNum)
     print_message("Closing - F ");
     move_servo(22, false, true);
     move_servo(23, false, true);
-    LEDpattern = LEDpattern ^ LEDArray[5];    
+    LEDpattern = LEDpattern & ~LEDArray[5];    
     set_LEDS();
     break;
 
@@ -356,7 +356,7 @@ void move_points(int switchNum)
     print_message("Button 13.", false, true);
     print_message("Closing - G ");
     move_servo(24, false, true);
-    LEDpattern = LEDpattern ^ LEDArray[6];    
+    LEDpattern = LEDpattern & ~LEDArray[6];    
     set_LEDS();
     break;
 
@@ -392,7 +392,7 @@ void move_points(int switchNum)
     print_message("Button 17.", false, true);
     print_message("Closing - I");
     move_servo(26, false, true);
-    LEDpattern = LEDpattern ^ LEDArray[8]; 
+    LEDpattern = LEDpattern & ~LEDArray[8]; 
     set_LEDS();
     break;
 
@@ -410,7 +410,7 @@ void move_points(int switchNum)
     print_message("Button 19.", false, true);
     print_message("Closing - J ");
     move_servo(27, false, true);
-    LEDpattern = LEDpattern ^ LEDArray[9];  
+    LEDpattern = LEDpattern & ~LEDArray[9];  
     set_LEDS();
     break;
 
@@ -429,7 +429,7 @@ void move_points(int switchNum)
     print_message("Closing - k");
     move_servo(0, false, true);
     move_servo(1, false, true);
-    LEDpattern = LEDpattern ^ LEDArray[10]; 
+    LEDpattern = LEDpattern & ~LEDArray[10]; 
     set_LEDS();
     break;
 
@@ -448,7 +448,7 @@ void move_points(int switchNum)
     print_message("Button 22.", false, true);
     print_message("Closing - L");
     move_servo(3, false, true);
-    LEDpattern = LEDpattern ^ LEDArray[11]; 
+    LEDpattern = LEDpattern & ~LEDArray[11]; 
     set_LEDS();
     break;
 
@@ -704,7 +704,7 @@ void loop()
     }
     oldPinValues = pinValues;
     // Set LED to reflect new settings
-    set_LEDS();
+    //set_LEDS();
   }
   delay(200);
 }
