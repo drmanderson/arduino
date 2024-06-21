@@ -133,9 +133,13 @@ void move_servo(byte srv, bool open, bool off)
     {
       for (byte i = servo[srv].currangle; i < ang; i++)
       {
+        int half = (ang - servo[srv].currangle)/2;
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
         delay(40);
+        if (i == half) {
+          set_relay(srv,open);
+        }
       }
       Serial.println("off");
       servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, 4096);
@@ -145,9 +149,13 @@ void move_servo(byte srv, bool open, bool off)
       for (byte i = servo[srv].currangle; i > ang; i--)
       {
         // Serial.println(i);
+        int half = (servo[srv].currangle - ang)/2;        
         int pulselength = map(i, 0, 180, SERVOMIN, SERVOMAX);
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, pulselength);
-        delay(30);
+        delay(40);
+        if (i == half) {
+          set_relay(srv,open);
+        }
       }
         Serial.println("off");
         servo[srv].pwmcard.setPWM(servo[srv].pwmcard_socket, 0, 4096); 
